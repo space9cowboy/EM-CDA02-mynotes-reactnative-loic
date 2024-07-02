@@ -56,7 +56,7 @@ const Formulaire = () => {
         await AsyncStorage.setItem('notes', JSON.stringify([...notes, newNote]));
       }
 
-      router.push('/');
+      router.push('/dashboard');
     } catch (error) {
       console.error('Failed to save note', error);
       Alert.alert('Error', 'Failed to save note');

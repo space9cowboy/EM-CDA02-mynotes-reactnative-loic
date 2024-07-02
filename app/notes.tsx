@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Button, StyleSheet, Alert, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Link, useRouter, useLocalSearchParams } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
 
 interface Note {
   id: string;
@@ -11,13 +12,13 @@ interface Note {
   priority: 'Important' | 'Normal' | 'Pense bête';
 }
 
-const notes = () => {
+const Notes = () => {
   const router = useRouter();
   const { noteId } = useLocalSearchParams();
   const [note, setNote] = useState<Note | null>(null);
 
-  useEffect(() => {
-    if (noteId) {
+  useFocusEffect(
+    React.useCallback(() => {
       const fetchNote = async () => {
         try {
           const storedNotes = await AsyncStorage.getItem('notes');
@@ -34,37 +35,26 @@ const notes = () => {
       };
 
       fetchNote();
-    }
-  }, [noteId]);
+    }, [noteId])
+  );
 
   const handleDelete = async () => {
-    Alert.alert(
-      'Confirm Delete',
-      'Are you sure you want to delete this note?',
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              const storedNotes = await AsyncStorage.getItem('notes');
-              const notes = storedNotes ? (JSON.parse(storedNotes) as Note[]) : [];
-              const updatedNotes = notes.filter(n => n.id !== noteId);
-              await AsyncStorage.setItem('notes', JSON.stringify(updatedNotes));
-              router.push('/');
-            } catch (error) {
-              console.error('Failed to delete note', error);
-              Alert.alert('Error', 'Failed to delete note');
-            }
-          },
-        },
-      ],
-      { cancelable: true }
-    );
+    try {
+      // Get the existing notes
+      const storedNotes = await AsyncStorage.getItem('notes');
+      const notes = storedNotes ? (JSON.parse(storedNotes) as Note[]) : [];
+
+      // Filter out the note to be deleted
+      const updatedNotes = notes.filter(n => n.id !== noteId);
+
+      // Save the updated notes back to AsyncStorage
+      await AsyncStorage.setItem('notes', JSON.stringify(updatedNotes));
+
+      // Navigate back to the dashboard
+      router.push('/dashboard');
+    } catch (error) {
+      console.error('Failed to delete note', error);
+    }
   };
 
   if (!note) {
@@ -178,4 +168,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default notes;
+export default Notes;

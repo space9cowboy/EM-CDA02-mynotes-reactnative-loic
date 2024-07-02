@@ -12,7 +12,7 @@ interface Note {
   priority: 'Important' | 'Normal' | 'Pense bête';
 }
 
-const dashboard = () => {
+const Dashboard = () => {
   const [notes, setNotes] = useState<Note[]>([]);
   const navigation = useNavigation();
 
@@ -45,7 +45,7 @@ const dashboard = () => {
   };
 
   const navigateToNoteDetails = (noteId: string) => {
-    navigation.navigate('notes', { noteId }); // Naviguer vers 'Note' avec l'ID de la note comme paramètre
+    navigation.navigate('notes', { noteId }); // Naviguer vers 'notes' avec l'ID de la note comme paramètre
   };
 
   return (
@@ -142,4 +142,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default dashboard;
+export default Dashboard;
