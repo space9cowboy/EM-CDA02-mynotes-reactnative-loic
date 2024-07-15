@@ -81,7 +81,7 @@ const Notes = () => {
           <Text style={styles.buttonText}>Delete</Text>
         </TouchableOpacity>
       </View>
-      <Link href="/" style={styles.backButton}>
+      <Link href="/dashboard" style={styles.backButton}>
         <Text style={styles.backButtonText}>Back to Dashboard</Text>
       </Link>
     </View>
