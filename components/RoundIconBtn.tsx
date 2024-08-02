@@ -1,30 +1,40 @@
 // RoundIconBtn.js
 import React from 'react';
-import { TouchableOpacity, StyleSheet } from 'react-native';
+import { Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import colors from '../misc/colors'; // Assurez-vous que colors contient vos couleurs
 
 const RoundIconBtn = ({ antIconName, size, color, onPress }) => {
   return (
     <TouchableOpacity 
-      style={[styles.iconContainer, { backgroundColor: colors.ERROR }]} 
+      style={[styles.iconContainer, { backgroundColor: colors.SECONDARY }]} 
       onPress={onPress}
     >
-      <AntDesign name={antIconName} size={size || 24} color={colors.WHITE} />
+       <Text style={styles.btnName}>ENTER</Text>
+      <AntDesign name={antIconName} size={size || 30} color={colors.WHITE} />
     </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
   iconContainer: {
-    height: 50,
-    width: 50,
-    borderRadius: 25,
+    flexDirection: 'row',
+     height: 50,
+    width: 310,
+    // padding: 20,
+    borderRadius: 15,
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 5,
     //shadowOpacity: 1,
+    gap: 10,
     
+  },
+  btnName: {
+    fontSize: 16,
+    fontFamily: 'Montserrat',
+    fontWeight: 'bold',
+    color: 'white',
   },
 });
 

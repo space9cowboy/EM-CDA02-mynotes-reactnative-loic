@@ -3,6 +3,7 @@ import { View, Text, TextInput, Button, StyleSheet, Alert, TouchableOpacity } fr
 import { useNavigation, useRoute } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
+import colors from '../misc/colors';
 
 interface Note {
   id: string;
@@ -47,6 +48,8 @@ const Formulaire = () => {
     }
   }, [noteId]);
 
+  // handlesave est une fonction asynchrone utilisé pour sauvegarder une nouvelle note ou mettre à jour une note existante
+  // dans le local storage en utilisant AsyncStorage
   const handleSave = async () => {
     try {
       const storedNotes = await AsyncStorage.getItem('notes');
@@ -67,41 +70,75 @@ const Formulaire = () => {
     }
   };
 
+  const getSelectedPriorityButtonStyle = (priority) => {
+    switch (priority) {
+      case 'Important':
+        return { backgroundColor: '#F45B69', borderWidth: 1, borderColor: '#F45B69'  }; // Tomate
+      case 'Normal':
+        return { backgroundColor: '#114B5F' , borderWidth: 1, borderColor: '#114B5F'  }; // Or
+      case 'Pense bête':
+        return { backgroundColor: '#7EE4EC', borderWidth: 1, borderColor: '#7EE4EC'  }; // Vert lime
+      default:
+        return {};
+    }
+  };
+
+  const renderPriorityButton = (priority: 'Important' | 'Normal' | 'Pense bête') => (
+    <TouchableOpacity
+      style={[
+        styles.priorityButton,
+        note.priority === priority && getSelectedPriorityButtonStyle(priority), 
+      ]}
+      onPress={() => setNote(prevNote => ({ ...prevNote, priority }))}
+    >
+      <Text style={[styles.priorityButtonText, note.priority === priority && styles.selectedPriorityButtonText]}>{priority}</Text>
+    </TouchableOpacity>
+  );
+
+  const handlePress = () => {
+    if (noteId) {
+      navigation.navigate('notes');  // Redirige vers la page 'notes' si on édite une note
+    } else {
+      navigation.navigate('dashboard');  // Redirige vers le 'dashboard' si on crée une nouvelle note
+    }
+  };
+
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Add a Note</Text>
+      <View style={styles.formHead}>
+        <TouchableOpacity style={styles.addButton} 
+      onPress={handlePress}>
+          <Ionicons name="arrow-back" size={30} color="white" />
+        </TouchableOpacity>
+        <Text style={styles.title}>{noteId ? 'Edit Note' : 'Create Note'}</Text>
+      </View>
       <TextInput
-        style={styles.input}
+        style={styles.inputTitle}
         placeholder="Title"
         value={note.title}
         onChangeText={(text) => setNote(prev => ({ ...prev, title: text }))}
       />
       <TextInput
-        style={styles.input}
+        style={styles.inputContent}
         placeholder="Content"
         value={note.content}
         onChangeText={(text) => setNote(prev => ({ ...prev, content: text }))}
         multiline
       />
       <Text style={styles.label}>Priority:</Text>
+      
       <View style={styles.priorityContainer}>
-        {['Important', 'Normal', 'Pense bête'].map((priority) => (
-          <TouchableOpacity
-            key={priority}
-            style={[
-              styles.priorityButton,
-              note.priority === priority && styles.selectedPriorityButton,
-            ]}
-            onPress={() => setNote(prev => ({ ...prev, priority }))}
-          >
-            <Text style={styles.priorityButtonText}>{priority}</Text>
-          </TouchableOpacity>
-        ))}
+        {renderPriorityButton('Important')}
+        {renderPriorityButton('Normal')}
+        {renderPriorityButton('Pense bête')}
       </View>
-      <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-        <Ionicons name="save" size={24} color="white" />
-        <Text style={styles.saveButtonText}>Save Note</Text>
-      </TouchableOpacity>
+      
+      <TouchableOpacity style={[styles.addCreate, { backgroundColor: colors.LIGHT, borderColor: 'white' }]} 
+      onPress={handleSave}>
+        {/* <Text style={styles.createText}>Create</Text> */}
+        <Ionicons name="add" size={40} color={colors.SECONDARY} />
+        </TouchableOpacity>
     </View>
   );
 };
@@ -112,15 +149,23 @@ const styles = StyleSheet.create({
     padding: 16,
     backgroundColor: '#456990',
   },
+  formHead: {
+    flexDirection: 'row',
+    justifyContent:'space-between',
+    alignItems: 'center',
+    alignContent: 'center',
+    marginBottom: 15,
+    
+  },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 16,
+    //marginBottom: 16,
     fontFamily: 'Montserrat',
     alignSelf: 'center',
     color: 'white',
   },
-  input: {
+  inputTitle: {
     height: 40,
     borderColor: '#ccc',
     borderWidth: 1,
@@ -128,6 +173,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     backgroundColor: 'white',
     borderRadius: 5,
+    fontFamily: 'Montserrat',
+    fontSize : '15',
+  },
+  inputContent: {
+    height: '55%',
+    borderColor: '#ccc',
+    borderWidth: 1,
+    marginBottom: 16,
+    paddingHorizontal: 8,
+    backgroundColor: 'white',
+    borderRadius: 5,
+    fontFamily: 'Montserrat',
+    fontSize : '15',
   },
   label: {
     fontSize: 18,
@@ -137,36 +195,47 @@ const styles = StyleSheet.create({
   },
   priorityContainer: {
     flexDirection: 'row',
-    marginBottom: 16,
+    marginBottom: 36,
     justifyContent: 'space-around',
+    
   },
   priorityButton: {
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 5,
-    backgroundColor: '#7EE4EC',
+    backgroundColor: '#456990',
+    borderWidth : 1,
+    borderColor: 'white',
   },
   selectedPriorityButton: {
-    backgroundColor: '#F45B69',
+    backgroundColor: '#456990',
+    
   },
   priorityButtonText: {
     color: 'white',
     fontFamily: 'Montserrat',
   },
-  saveButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 10,
-    borderRadius: 5,
+  addCreate : {
+    
+    marginTop: 10,
+    marginBottom: 20,
+    paddingVertical: 20,
+    paddingHorizontal: 20,
     backgroundColor: '#114B5F',
-  },
-  saveButtonText: {
-    marginLeft: 10,
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: 16,
+    padding: 15,
+    alignSelf: 'flex-end',
+    justifyContent: 'center',
     fontFamily: 'Montserrat',
+    borderRadius: 50,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 5,
+      height: 9,
+    },
+    shadowOpacity: 0.9,
+    shadowRadius: 9.51,
+    elevation: 5,
+    
   },
 });
 

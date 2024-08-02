@@ -183,21 +183,10 @@ const styles = StyleSheet.create({
     
   },
   priorityText : {
-    backgroundColor : 'blue',
-    borderRadius : 25,
+    
+    borderRadius : 10,
   },
-  priorityImportant: {
-    backgroundColor: '#FF0000',
-    color: '#FFF',
-  },
-  priorityNormal: {
-    backgroundColor: '#FFD700',
-    color: '#FFF',
-  },
-  priorityPenseBete: {
-    backgroundColor: '#00FF00',
-    color: '#FFF',
-  },
+ 
   buttonContainer: {
     //width: '100%',
     flexDirection: 'row',

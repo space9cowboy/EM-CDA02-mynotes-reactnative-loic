@@ -16,6 +16,8 @@ interface Note {
 const Dashboard = () => {
   const [greet, setGreet] = useState('Evening');
   const [notes, setNotes] = useState<Note[]>([]);
+  const [filteredNotes, setFilteredNotes] = useState<Note[]>([]);
+  const [selectedFilter, setSelectedFilter] = useState<string>('All');
   const [user, setUser] = useState<{ name: string }>({ name: '' });
   const navigation = useNavigation(); 
 
@@ -42,6 +44,7 @@ const Dashboard = () => {
         // Trier les notes par createdAt dans l'ordre décroissant
         notesArray.sort((a: Note, b: Note) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
         setNotes(notesArray);
+        setFilteredNotes(notesArray); // Initialement afficher toutes les notes
       }
     } catch (error) {
       console.error('Failed to load notes', error);
@@ -90,15 +93,62 @@ const Dashboard = () => {
     navigation.navigate('notes', { noteId }); 
   };
 
+  const handleFilterChange = (filter: string) => {
+    setSelectedFilter(filter);
+    if (filter === 'All') {
+      setFilteredNotes(notes);
+    } else {
+      setFilteredNotes(notes.filter(note => note.priority === filter));
+    }
+  };
+
+  const countNotesByPriority = (priority: string) => {
+    if (priority === 'All') return notes.length;
+    return notes.filter(note => note.priority === priority).length;
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{`Good ${greet}, ${user.name}`}</Text>
-      {notes.length === 0 ? (
-        <Text style={styles.noNotesText}>No notes available</Text>
+
+      {/* Fixer une hauteur constante pour la ScrollView des filtres */}
+      <ScrollView 
+         horizontal 
+        showsHorizontalScrollIndicator={false} 
+        style={styles.filterScrollView}
+      >
+        <View style={styles.filterContainer}>
+          {['All', 'Important', 'Normal', 'Pense bête'].map((filter) => (
+            <TouchableOpacity
+              key={filter}
+              style={[
+                styles.filterButton,
+                selectedFilter === filter && styles.selectedFilterButton,
+              ]}
+              onPress={() => handleFilterChange(filter)}
+            >
+              <Text
+                style={[
+                  styles.filterButtonText,
+                  selectedFilter === filter && styles.selectedFilterButtonText,
+                ]}
+              >
+                {filter} ({countNotesByPriority(filter)})
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </ScrollView>
+
+      {filteredNotes.length === 0 ? (
+            <View style={styles.emptyContainer}>
+            <Text style={styles.noNotesText}>No notes available</Text>
+          </View>
       ) : (
         <ScrollView style={styles.scrollView}>
-          {notes.map((note) => (
+          {filteredNotes.map((note) => (
             <TouchableOpacity
+          
               key={note.id}
               style={styles.card}
               onPress={() => navigateToNoteDetails(note.id)}
@@ -123,10 +173,11 @@ const Dashboard = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+      flex: 1,
     padding: 16,
     backgroundColor: '#456990',
     justifyContent: 'space-between',
+    //height: '100%',
   },
   title: {
     fontSize: 24,
@@ -136,14 +187,22 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     color: 'white',
   },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center', // Centrer verticalement
+    alignItems: 'center',
+    paddingBottom: 150, // Centrer horizontalement
+  },
   noNotesText: {
     fontSize: 16,
     color: 'white',
     textAlign: 'center',
     fontFamily: 'Montserrat',
+    justifyContent: 'center',
+    alignSelf :'center',
   },
   scrollView: {
-    flex: 1,
+    height: '70%',
   },
   card: {
     flexDirection: 'row',
@@ -202,6 +261,37 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
     alignSelf: 'center',
+  },
+  filterScrollView: {
+    // Hauteur fixe pour la ScrollView des filtres
+    // height: 100,
+    // marginBottom: 16,
+  },
+  filterContainer: {
+    flexDirection: 'row',
+    
+    
+     // Empêche le retour à la ligne
+  },
+  filterButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    backgroundColor: '#114B5F',
+    marginRight: 16, // Espacement entre les boutons
+    minWidth: 100,
+    height: 40, // Largeur minimale des boutons
+    alignItems: 'center', // Centrage du texte
+  },
+  selectedFilterButton: {
+    backgroundColor: '#7EE4EC',
+  },
+  filterButtonText: {
+    color: 'white',
+    fontFamily: 'Montserrat',
+  },
+  selectedFilterButtonText: {
+    fontWeight: 'bold',
   },
 });
 

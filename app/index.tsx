@@ -101,20 +101,20 @@ export default function Page() {
     }).start();
   };
 
-  const interpolateColor = colorAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [colors.SECONDARY, colors.TERTIARY],
-  });
+  // const interpolateColor = colorAnim.interpolate({
+  //   inputRange: [0, 1],
+  //   outputRange: [colors.SECONDARY, colors.TERTIARY],
+  // });
 
   return (
     <>
       <StatusBar hidden />
-      <AnimatedLinearGradient
-        colors={[colors.LIGHT, interpolateColor]}
+      {/* <AnimatedLinearGradient
+        colors={[colors.LIGHT]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.container}
-      >
+      > */}
         <View style={styles.main}>
           <Text style={styles.title}>MyNotes</Text>
           <View>
@@ -132,17 +132,18 @@ export default function Page() {
           <Animated.View style={[styles.btnContainer, { opacity: fadeAnim, transform: [{ translateY: translateYAnim }] }]}>
             {buttonVisible && (
               <TouchableOpacity onPress={handleSubmit} >
-                <RoundIconBtn antIconName='arrowright' color={colors.PRIMARY} size={20} onPress={handleSubmit} />
+               
+                <RoundIconBtn antIconName='arrowright' color={colors.PRIMARY} size={25} onPress={handleSubmit} />
               </TouchableOpacity>
             )}
           </Animated.View>
         </View>
-      </AnimatedLinearGradient>
+      {/* </AnimatedLinearGradient> */}
     </>
   );
 }
 
-const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
+//const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
 
 const styles = StyleSheet.create({
   container: {
@@ -152,8 +153,11 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   main: {
-    width: '80%',
+    flex: 1,
     alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+    backgroundColor: colors.TERTIARY,
   },
   title: {
     fontFamily: 'Montserrat',
@@ -178,8 +182,8 @@ const styles = StyleSheet.create({
     
   },
   textInput: {
-    width: '100%',
-    borderWidth: 2,
+    width: '80%',
+    borderWidth: 1,
     borderRadius: 15,
     borderColor: '#000',
     fontSize: 18,
@@ -190,11 +194,11 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     fontFamily: 'Montserrat',
   },
-  btnContainer: {
-    alignSelf: 'center',
-    marginBottom: 20,
-    width: 50,
-    height: 50,
-  },
+  // btnContainer: {
+  //   alignSelf: 'center',
+  //   marginBottom: 20,
+  //   width: 50,
+  //   height: 50,
+  // },
  
 });
