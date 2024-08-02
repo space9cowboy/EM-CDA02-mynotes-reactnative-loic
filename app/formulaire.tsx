@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert, TouchableOpacity } from 'react-native';
-import { Link, useRouter, useLocalSearchParams } from 'expo-router';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Ionicons } from '@expo/vector-icons';
 
 interface Note {
   id: string;
@@ -9,17 +10,20 @@ interface Note {
   date: string;
   content: string;
   priority: 'Important' | 'Normal' | 'Pense bête';
+  createdAt: string;
 }
 
 const Formulaire = () => {
-  const router = useRouter();
-  const { noteId } = useLocalSearchParams();
+  const navigation = useNavigation();
+  const route = useRoute();
+  const noteId = route.params?.noteId;
   const [note, setNote] = useState<Note>({
     id: '',
     title: '',
     date: new Date().toLocaleDateString(),
     content: '',
     priority: 'Normal',
+    createdAt: new Date().toISOString(),
   });
 
   useEffect(() => {
@@ -52,52 +56,52 @@ const Formulaire = () => {
         const updatedNotes = notes.map(n => (n.id === noteId ? note : n));
         await AsyncStorage.setItem('notes', JSON.stringify(updatedNotes));
       } else {
-        const newNote = { ...note, id: Date.now().toString() }; // Génération d'un identifiant unique basé sur la date actuelle
+        const newNote = { ...note, id: Date.now().toString(), createdAt: new Date().toISOString() }; // Génération d'un identifiant unique basé sur la date actuelle
         await AsyncStorage.setItem('notes', JSON.stringify([...notes, newNote]));
       }
 
-      router.push('/dashboard');
+      navigation.navigate('dashboard');
     } catch (error) {
       console.error('Failed to save note', error);
-      Alert.alert('Error', 'Failed to save note');
+      Alert.alert('Error', 'Failed to save note.');
     }
   };
 
-  const renderPriorityButton = (priority: 'Important' | 'Normal' | 'Pense bête') => (
-    <TouchableOpacity
-      style={[styles.priorityButton, note.priority === priority && styles.selectedPriorityButton]}
-      onPress={() => setNote(prevNote => ({ ...prevNote, priority }))}
-    >
-      <Text style={styles.priorityButtonText}>{priority}</Text>
-    </TouchableOpacity>
-  );
-
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{noteId ? 'Edit Note' : 'Create Note'}</Text>
+      <Text style={styles.title}>Add a Note</Text>
       <TextInput
         style={styles.input}
         placeholder="Title"
         value={note.title}
-        onChangeText={(text) => setNote(prevNote => ({ ...prevNote, title: text }))}
+        onChangeText={(text) => setNote(prev => ({ ...prev, title: text }))}
       />
       <TextInput
         style={styles.input}
         placeholder="Content"
         value={note.content}
-        onChangeText={(text) => setNote(prevNote => ({ ...prevNote, content: text }))}
+        onChangeText={(text) => setNote(prev => ({ ...prev, content: text }))}
         multiline
       />
-      <Text style={styles.priorityLabel}>Priority:</Text>
+      <Text style={styles.label}>Priority:</Text>
       <View style={styles.priorityContainer}>
-        {renderPriorityButton('Important')}
-        {renderPriorityButton('Normal')}
-        {renderPriorityButton('Pense bête')}
+        {['Important', 'Normal', 'Pense bête'].map((priority) => (
+          <TouchableOpacity
+            key={priority}
+            style={[
+              styles.priorityButton,
+              note.priority === priority && styles.selectedPriorityButton,
+            ]}
+            onPress={() => setNote(prev => ({ ...prev, priority }))}
+          >
+            <Text style={styles.priorityButtonText}>{priority}</Text>
+          </TouchableOpacity>
+        ))}
       </View>
-      <Button title="Save" onPress={handleSave} />
-      <Link href="/" style={styles.backButton}>
-        <Text style={styles.backButtonText}>Back to Dashboard</Text>
-      </Link>
+      <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+        <Ionicons name="save" size={24} color="white" />
+        <Text style={styles.saveButtonText}>Save Note</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -106,60 +110,63 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: '#fff',
+    backgroundColor: '#456990',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 16,
+    fontFamily: 'Montserrat',
+    alignSelf: 'center',
+    color: 'white',
   },
   input: {
     height: 40,
     borderColor: '#ccc',
     borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 8,
     marginBottom: 16,
+    paddingHorizontal: 8,
+    backgroundColor: 'white',
+    borderRadius: 5,
   },
-  priorityLabel: {
+  label: {
     fontSize: 18,
-    fontWeight: 'bold',
     marginBottom: 8,
+    color: 'white',
+    fontFamily: 'Montserrat',
   },
   priorityContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     marginBottom: 16,
+    justifyContent: 'space-around',
   },
   priorityButton: {
-    flex: 1,
-    padding: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    alignItems: 'center',
-    marginHorizontal: 4,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    backgroundColor: '#7EE4EC',
   },
   selectedPriorityButton: {
-    backgroundColor: '#007BFF',
-    borderColor: '#007BFF',
+    backgroundColor: '#F45B69',
   },
   priorityButtonText: {
-    color: '#fff',
+    color: 'white',
+    fontFamily: 'Montserrat',
   },
-  backButton: {
-    marginTop: 16,
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    backgroundColor: '#007BFF',
-    borderRadius: 8,
+  saveButton: {
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    paddingVertical: 10,
+    borderRadius: 5,
+    backgroundColor: '#114B5F',
   },
-  backButtonText: {
-    fontSize: 18,
-    color: '#fff',
+  saveButtonText: {
+    marginLeft: 10,
+    color: 'white',
     fontWeight: 'bold',
+    fontSize: 16,
+    fontFamily: 'Montserrat',
   },
 });
 

@@ -3,6 +3,10 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Link, useRouter, useLocalSearchParams } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
+import AntDesign from '@expo/vector-icons/AntDesign';
+import colors from '../misc/colors';
 
 interface Note {
   id: string;
@@ -16,6 +20,9 @@ const Notes = () => {
   const router = useRouter();
   const { noteId } = useLocalSearchParams();
   const [note, setNote] = useState<Note | null>(null);
+  const navigation = useNavigation();
+
+ 
 
   useFocusEffect(
     React.useCallback(() => {
@@ -65,25 +72,57 @@ const Notes = () => {
     );
   }
 
+  const handlePress = () => {
+    navigation.navigate('dashboard');
+  };
+
+  const handleEditPress = () => {
+    navigation.navigate('formulaire', { noteId: note.id });
+  };
+
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'Important':
+        return '#F45B69'; // Red
+      case 'Normal':
+        return '#456990'; // Green
+      case 'Pense bête':
+        return '#7EE4EC'; // Blue
+      default:
+        return '#000000'; // Black
+    }
+  };
+
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{note.title}</Text>
-      <Text style={styles.date}>{note.date}</Text>
-      <Text style={styles.content}>{note.content}</Text>
-      <Text style={styles.priority}>
-        {note.priority}
-      </Text>
+      <View style={styles.formHead}>
+        <TouchableOpacity 
+      onPress={handlePress}>
+          <Ionicons name="arrow-back" size={30} color='#114B5F' />
+        </TouchableOpacity>
+        <Text style={styles.title}>My Note</Text>
+      </View>
+      <View style={styles.notesContainer}>
+        <Text style={styles.titleNote}>{note.title}</Text>
+        <Text style={styles.date}>{note.date}</Text>
+        <Text style={styles.content}>{note.content}</Text>
+      </View>
+      
       <View style={styles.buttonContainer}>
-        <Link href={`/formulaire?noteId=${note.id}`} style={styles.button}>
-          <Text style={styles.buttonText}>Edit</Text>
-        </Link>
-        <TouchableOpacity onPress={handleDelete} style={styles.button}>
-          <Text style={styles.buttonText}>Delete</Text>
+      <TouchableOpacity onPress={handleEditPress} style={styles.buttonEdit}>
+        <AntDesign name="edit" size={30} color="white" />
+      </TouchableOpacity>
+        <View style={{ ...styles.priorityText, backgroundColor: getPriorityColor(note.priority) }}>
+          <Text style={styles.priority}>
+          {note.priority}
+          </Text>
+        </View>
+        <TouchableOpacity onPress={handleDelete} style={styles.buttonDelete}>
+        <AntDesign name="delete" size={30} color="white" />
         </TouchableOpacity>
       </View>
-      <Link href="/dashboard" style={styles.backButton}>
-        <Text style={styles.backButtonText}>Back to Dashboard</Text>
-      </Link>
+      
     </View>
   );
 };
@@ -92,29 +131,60 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: '#fff',
+    backgroundColor: '#FFD4CA'
+  },
+  formHead: {
+    flexDirection: 'row',
+    justifyContent:'space-between',
+    alignItems: 'center',
+    alignContent: 'center',
+    marginBottom: 25,
+    
+  },
+  notesContainer : {
+    flex : 1,
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 8,
+    //marginBottom: 16,
+    fontFamily: 'Montserrat',
+    color: '#114B5F',
+    marginRight : 120,
+    
+  },
+  titleNote: {
+    fontSize: 30,
+    fontWeight: 'bold',
+    marginBottom: 5,
+    fontFamily: 'Montserrat',
   },
   date: {
-    fontSize: 16,
+    fontSize: 12,
     color: '#888',
     marginBottom: 16,
+    fontFamily: 'Montserrat',
   },
   content: {
     fontSize: 18,
     marginBottom: 16,
+    fontFamily: 'Montserrat',
   },
   priority: {
     fontSize: 16,
     fontWeight: 'bold',
-    padding: 8,
-    borderRadius: 8,
+    padding: 25,
+    //borderRadius: 25,
     textAlign: 'center',
-    marginBottom: 16,
+    //backgroundColor: 'blue',
+    alignSelf: 'center',
+    //marginBottom: 16,
+    fontFamily: 'Montserrat',
+    
+  },
+  priorityText : {
+    backgroundColor : 'blue',
+    borderRadius : 25,
   },
   priorityImportant: {
     backgroundColor: '#FF0000',
@@ -129,23 +199,35 @@ const styles = StyleSheet.create({
     color: '#FFF',
   },
   buttonContainer: {
+    //width: '100%',
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 16,
+
   },
-  button: {
-    flex: 1,
-    padding: 12,
-    borderRadius: 8,
-    backgroundColor: '#007BFF',
+  buttonEdit: {
+    //flex: 1,
+    padding: 20,
+    borderRadius: 50,
+    backgroundColor: '#114B5F',
+    alignItems: 'center',
+    marginHorizontal: 4,
+    //width : 100,
+   
+  },
+  buttonDelete: {
+    //flex: 1,
+    padding: 20,
+    borderRadius: 50,
+    backgroundColor: '#114B5F',
     alignItems: 'center',
     marginHorizontal: 4,
   },
-  buttonText: {
-    fontSize: 18,
-    color: '#FFF',
-    fontWeight: 'bold',
-  },
+  // buttonText: {
+  //   fontSize: 18,
+  //   color: '#FFF',
+  //   fontWeight: 'bold',
+  // },
   backButton: {
     marginTop: 16,
     paddingVertical: 12,
