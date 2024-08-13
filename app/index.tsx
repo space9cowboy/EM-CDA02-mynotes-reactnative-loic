@@ -5,32 +5,23 @@ import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import RoundIconBtn from '@/components/RoundIconBtn';
 import colors from '../misc/colors';
+import { useDeviceType } from '../hooks/useDeviceType'; // Assurez-vous du bon chemin
 
-
-
-export default function Page() {
+const Index = () => {
   const [name, setName] = useState('');
   const [buttonVisible, setButtonVisible] = useState(false);
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const translateYAnim = useRef(new Animated.Value(20)).current;
   const colorAnim = useRef(new Animated.Value(0)).current;
   const navigation = useNavigation();
+  const { isTabletOrMobileDevice } = useDeviceType(); 
 
- 
-  /**
-   * The function `handleOnChangeText` updates the name state and toggles the visibility of a button
-   * based on the length of the input text.
-   * @param text - The `text` parameter is a string value that is passed to the `handleOnChangeText`
-   * function.
-   */
   const handleOnChangeText = (text: string) => {
     setName(text);
     setButtonVisible(text.trim().length > 2);
   };
 
-  
   const handleSubmit = async () => {
-    console.log("Submit button pressed");
     if (name.trim().length > 0) {
       const user = { name: name };
       await AsyncStorage.setItem('user', JSON.stringify(user));
@@ -50,11 +41,8 @@ export default function Page() {
 
   useEffect(() => {
     const resetStateOnFocus = navigation.addListener('focus', () => {
-      // Reset state immediately
       setName('');
       setButtonVisible(false);
-
-      // Reset color animation immediately
       colorAnim.setValue(0);
       fadeAnim.setValue(0);
       translateYAnim.setValue(20);
@@ -101,63 +89,45 @@ export default function Page() {
     }).start();
   };
 
-  // const interpolateColor = colorAnim.interpolate({
-  //   inputRange: [0, 1],
-  //   outputRange: [colors.SECONDARY, colors.TERTIARY],
-  // });
-
   return (
     <>
       <StatusBar hidden />
-      {/* <AnimatedLinearGradient
-        colors={[colors.LIGHT]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.container}
-      > */}
-        <View style={styles.main}>
-          <Text style={styles.title}>MyNotes</Text>
-          <View>
-          <Image source={require('../assets/images/mynotes1.png')} 
-           style={styles.image}
-           />
-          </View>
-          <Text style={styles.subtitle}>Enter your name to continue</Text>
-          <TextInput
-            value={name}
-            onChangeText={handleOnChangeText}
-            placeholder='Enter Name'
-            style={styles.textInput}
-          />
-          <Animated.View style={[styles.btnContainer, { opacity: fadeAnim, transform: [{ translateY: translateYAnim }] }]}>
-            {buttonVisible && (
-              <TouchableOpacity onPress={handleSubmit} >
-               
-                <RoundIconBtn antIconName='arrowright' color={colors.PRIMARY} size={25} onPress={handleSubmit} />
-              </TouchableOpacity>
-            )}
-          </Animated.View>
+      <View style={[styles.main, isTabletOrMobileDevice && styles.mainTablet]}>
+        <Text style={[styles.title, isTabletOrMobileDevice && styles.tabletTitle]}>MyNotes</Text>
+        <View>
+          <Image source={require('../assets/images/mynotes1.png')}  style={[styles.image, isTabletOrMobileDevice && styles.tabletImage]} />
         </View>
-      {/* </AnimatedLinearGradient> */}
+        <Text  style={[styles.subtitle, isTabletOrMobileDevice && styles.tabletSubtitle]}>Enter your name to continue</Text>
+        <TextInput
+          value={name}
+          onChangeText={handleOnChangeText}
+          placeholder='Enter Name'
+          style={[styles.textInput, isTabletOrMobileDevice && styles.tabletTextInput]}
+        />
+        <Animated.View style={[styles.btnContainer, { opacity: fadeAnim, transform: [{ translateY: translateYAnim }] }]}>
+          {buttonVisible && (
+            <TouchableOpacity onPress={handleSubmit}>
+              <RoundIconBtn antIconName='arrowright' color={colors.PRIMARY}  onPress={handleSubmit} />
+            </TouchableOpacity>
+          )}
+        </Animated.View>
+      </View>
     </>
   );
-}
-
-//const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
+};
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%',
-  },
   main: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    width: '100%',
+    
     backgroundColor: colors.TERTIARY,
+    padding: 32,
+  },
+  mainTablet: {
+    padding: 32,
+    
   },
   title: {
     fontFamily: 'Montserrat',
@@ -166,20 +136,28 @@ const styles = StyleSheet.create({
     color: 'white',
     padding: 20,
   },
-
-  image : {
+  tabletTitle: {
+    fontSize: 90,
+  },
+  image: {
     width: 150,
     height: 150,
     borderRadius: 20,
   },
+  tabletImage: {
+    width: 300,
+    height: 300,
+    borderRadius: 35,
+    marginBottom: 15,
+  },
   subtitle: {
     fontSize: 14,
-    // color: '#38434D',
     padding: 14,
-    // marginBottom: 10,
     color: 'white',
     fontFamily: 'Montserrat',
-    
+  },
+  tabletSubtitle: {
+    fontSize: 20,
   },
   textInput: {
     width: '80%',
@@ -190,15 +168,15 @@ const styles = StyleSheet.create({
     height: 45,
     backgroundColor: 'white',
     paddingLeft: 5,
-    //opacity: 0.5,
     marginBottom: 20,
     fontFamily: 'Montserrat',
   },
-  // btnContainer: {
-  //   alignSelf: 'center',
-  //   marginBottom: 20,
-  //   width: 50,
-  //   height: 50,
-  // },
- 
+  tabletTextInput : {
+    width: '60%',
+    fontSize: 28,
+    height: 65,
+    borderRadius: 20,
+  },
 });
+
+export default Index;

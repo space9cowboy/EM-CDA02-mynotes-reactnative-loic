@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Ionicons } from '@expo/vector-icons';
+import { useDeviceType } from '../hooks/useDeviceType'; 
+import AddButton from '@/components/AddButton';
 
 interface Note {
   id: string;
@@ -19,7 +20,8 @@ const Dashboard = () => {
   const [filteredNotes, setFilteredNotes] = useState<Note[]>([]);
   const [selectedFilter, setSelectedFilter] = useState<string>('All');
   const [user, setUser] = useState<{ name: string }>({ name: '' });
-  const navigation = useNavigation(); 
+  const navigation = useNavigation();
+  const { isTabletOrMobileDevice } = useDeviceType();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -41,10 +43,9 @@ const Dashboard = () => {
       const storedNotes = await AsyncStorage.getItem('notes');
       if (storedNotes) {
         const notesArray = JSON.parse(storedNotes);
-        // Trier les notes par createdAt dans l'ordre décroissant
         notesArray.sort((a: Note, b: Note) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
         setNotes(notesArray);
-        setFilteredNotes(notesArray); // Initialement afficher toutes les notes
+        setFilteredNotes(notesArray);
       }
     } catch (error) {
       console.error('Failed to load notes', error);
@@ -56,7 +57,7 @@ const Dashboard = () => {
   }, []);
 
   useFocusEffect(
-    React.useCallback(() => {
+    useCallback(() => {
       fetchNotes();
     }, [])
   );
@@ -85,12 +86,17 @@ const Dashboard = () => {
     }
   };
 
+  // Fonction pour supprimer les balises HTML avec une regex
+  const stripHTML = (html: string) => {
+    return html.replace(/<[^>]*>/g, '');
+  };
+
   const handlePress = () => {
     navigation.navigate('formulaire');
   };
 
   const navigateToNoteDetails = (noteId: string) => {
-    navigation.navigate('notes', { noteId }); 
+    navigation.navigate('notes', { noteId });
   };
 
   const handleFilterChange = (filter: string) => {
@@ -108,21 +114,23 @@ const Dashboard = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>{`Good ${greet}, ${user.name}`}</Text>
+    <View style={[styles.container, isTabletOrMobileDevice && styles.containerTablet]}>
+      <Text style={[styles.title, isTabletOrMobileDevice && styles.titleTablet]}>
+        {`Good ${greet}, ${user.name}`}
+      </Text>
 
-      {/* Fixer une hauteur constante pour la ScrollView des filtres */}
       <ScrollView 
-         horizontal 
+        horizontal 
         showsHorizontalScrollIndicator={false} 
-        style={styles.filterScrollView}
+        style={[styles.filterScrollView, isTabletOrMobileDevice && styles.filterScrollViewTablet]}
       >
-        <View style={styles.filterContainer}>
+        <View style={[styles.filterContainer, isTabletOrMobileDevice && styles.filterContainerTablet]}>
           {['All', 'Important', 'Normal', 'Pense bête'].map((filter) => (
             <TouchableOpacity
               key={filter}
               style={[
                 styles.filterButton,
+                isTabletOrMobileDevice && styles.filterButtonTablet,
                 selectedFilter === filter && styles.selectedFilterButton,
               ]}
               onPress={() => handleFilterChange(filter)}
@@ -130,6 +138,7 @@ const Dashboard = () => {
               <Text
                 style={[
                   styles.filterButtonText,
+                  isTabletOrMobileDevice && styles.filterButtonTextTablet,
                   selectedFilter === filter && styles.selectedFilterButtonText,
                 ]}
               >
@@ -141,31 +150,38 @@ const Dashboard = () => {
       </ScrollView>
 
       {filteredNotes.length === 0 ? (
-            <View style={styles.emptyContainer}>
-            <Text style={styles.noNotesText}>No notes available</Text>
-          </View>
+        <View style={styles.emptyContainer}>
+          <Text style={[styles.noNotesText, isTabletOrMobileDevice && styles.noNotesTextTablet]}>
+            No notes available
+          </Text>
+        </View>
       ) : (
         <ScrollView style={styles.scrollView}>
           {filteredNotes.map((note) => (
             <TouchableOpacity
-          
               key={note.id}
-              style={styles.card}
+              style={[styles.card, isTabletOrMobileDevice && styles.cardTablet]}
               onPress={() => navigateToNoteDetails(note.id)}
             >
               <View style={{ ...styles.priorityIndicator, backgroundColor: getPriorityColor(note.priority) }} />
               <View style={styles.cardContent}>
-                <Text style={styles.noteTitle}>{note.title}</Text>
-                <Text style={styles.noteDate}>{note.date}</Text>
-                <Text style={styles.noteContent} numberOfLines={1}>{note.content}</Text>
+                <Text style={[styles.noteTitle, isTabletOrMobileDevice && styles.noteTitleTablet]}>
+                  {note.title}
+                </Text>
+                <Text style={[styles.noteDate, isTabletOrMobileDevice && styles.noteDateTablet]}>
+                  {note.date}
+                </Text>
+                <Text style={[styles.noteContent, isTabletOrMobileDevice && styles.noteContentTablet]} numberOfLines={1}>
+                  {stripHTML(note.content)}
+                </Text>
               </View>
             </TouchableOpacity>
           ))}
         </ScrollView>
       )}
       
-      <TouchableOpacity style={styles.addButton} onPress={handlePress}>
-        <Ionicons name="add" size={40} color="white" />
+      <TouchableOpacity onPress={handlePress} style={styles.addButton}>
+        <AddButton onPress={handlePress}/>
       </TouchableOpacity>
     </View>
   );
@@ -173,11 +189,13 @@ const Dashboard = () => {
 
 const styles = StyleSheet.create({
   container: {
-      flex: 1,
+    flex: 1,
     padding: 16,
     backgroundColor: '#456990',
     justifyContent: 'space-between',
-    //height: '100%',
+  },
+  containerTablet: {
+    padding: 32,
   },
   title: {
     fontSize: 24,
@@ -187,19 +205,52 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     color: 'white',
   },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center', // Centrer verticalement
-    alignItems: 'center',
-    paddingBottom: 150, // Centrer horizontalement
+  titleTablet: {
+    fontSize: 34,
+    marginBottom: 26,
   },
-  noNotesText: {
-    fontSize: 16,
-    color: 'white',
-    textAlign: 'center',
-    fontFamily: 'Montserrat',
+  filterScrollView: {
+    marginBottom: 16,
+  },
+  filterScrollViewTablet: {
+    marginBottom: 19,
+  },
+  filterContainer: {
+    flexDirection: 'row',
+  },
+  filterContainerTablet: {
     justifyContent: 'center',
-    alignSelf :'center',
+  },
+  filterButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    backgroundColor: '#114B5F',
+    marginRight: 16,
+    height: 40,
+    alignItems: 'center',
+  },
+  filterButtonTablet: {
+    paddingVertical: 20,
+    paddingHorizontal: 29,
+    borderRadius: 10,
+    backgroundColor: '#114B5F',
+    marginRight: 18,
+    height: 65,
+    alignItems: 'center',
+  },
+  selectedFilterButton: {
+    backgroundColor: '#7EE4EC',
+  },
+  filterButtonText: {
+    color: 'white',
+    fontFamily: 'Montserrat',
+  },
+  filterButtonTextTablet: {
+    fontSize: 21,
+  },
+  selectedFilterButtonText: {
+    fontWeight: 'bold',
   },
   scrollView: {
     height: '70%',
@@ -209,6 +260,13 @@ const styles = StyleSheet.create({
     padding: 10,
     marginVertical: 8,
     borderRadius: 8,
+    backgroundColor: '#f9f9f9',
+    elevation: 2,
+  },
+  cardTablet: {
+    padding: 15,
+    marginVertical: 11,
+    borderRadius: 15,
     backgroundColor: '#f9f9f9',
     elevation: 2,
   },
@@ -224,74 +282,49 @@ const styles = StyleSheet.create({
   noteTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    fontFamily: 'Montserrat'
+    fontFamily: 'Montserrat',
+  },
+  noteTitleTablet: {
+    fontSize: 28,
   },
   noteDate: {
     fontSize: 14,
     color: '#666',
     marginVertical: 4,
-    fontFamily: 'Montserrat'
+    fontFamily: 'Montserrat',
+  },
+  noteDateTablet: {
+    fontSize: 18,
   },
   noteContent: {
     fontSize: 16,
-    fontFamily: 'Montserrat'
-  },
-  addButton: {
-    marginTop: 10,
-    marginBottom: 20,
-    paddingVertical: 20,
-    paddingHorizontal: 20,
-    backgroundColor: '#114B5F',
-    padding: 15,
-    alignSelf: 'flex-end',
-    justifyContent: 'center',
     fontFamily: 'Montserrat',
-    borderRadius: 50,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 5,
-      height: 9,
-    },
-    shadowOpacity: 0.9,
-    shadowRadius: 9.51,
-    elevation: 5,
   },
-  addButtonText: {
+  noteContentTablet: {
+    fontSize: 24,
+  },
+  emptyContainer: {
+    flex: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  noNotesText: {
     fontSize: 18,
-    color: '#fff',
-    fontWeight: 'bold',
-    alignSelf: 'center',
-  },
-  filterScrollView: {
-    // Hauteur fixe pour la ScrollView des filtres
-    // height: 100,
-    // marginBottom: 16,
-  },
-  filterContainer: {
-    flexDirection: 'row',
-    
-    
-     // Empêche le retour à la ligne
-  },
-  filterButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 5,
-    backgroundColor: '#114B5F',
-    marginRight: 16, // Espacement entre les boutons
-    minWidth: 100,
-    height: 40, // Largeur minimale des boutons
-    alignItems: 'center', // Centrage du texte
-  },
-  selectedFilterButton: {
-    backgroundColor: '#7EE4EC',
-  },
-  filterButtonText: {
     color: 'white',
     fontFamily: 'Montserrat',
   },
-  selectedFilterButtonText: {
-    fontWeight: 'bold',
+  noNotesTextTablet: {
+    fontSize: 28,
+    color: 'white',
+    fontFamily: 'Montserrat',
+  },
+  addButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 16,
+    backgroundColor: '#114B5F',
+    borderRadius: 50,
+    marginBottom: 32,
   },
 });
 

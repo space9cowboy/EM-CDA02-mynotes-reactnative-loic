@@ -2,16 +2,25 @@
 import React from 'react';
 import { Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
-import colors from '../misc/colors'; // Assurez-vous que colors contient vos couleurs
+import colors from '../misc/colors';
+import { useDeviceType } from '../hooks/useDeviceType'; // Import de useDeviceType
 
 const RoundIconBtn = ({ antIconName, size, color, onPress }) => {
+  const { isTabletOrMobileDevice } = useDeviceType(); 
+
+  // Ajustement dynamique de la taille et des styles
+  const iconSize = isTabletOrMobileDevice ? (size || 35) : (size || 25); 
+
   return (
     <TouchableOpacity 
-      style={[styles.iconContainer, { backgroundColor: colors.SECONDARY }]} 
+      style={[
+        styles.iconContainer, 
+        isTabletOrMobileDevice && styles.tabletIconContainer
+      ]} 
       onPress={onPress}
     >
-       <Text style={styles.btnName}>ENTER</Text>
-      <AntDesign name={antIconName} size={size || 30} color={colors.WHITE} />
+      <Text style={[styles.btnName, isTabletOrMobileDevice && styles.tabletBtnName]}>ENTER</Text>
+      <AntDesign name={antIconName} size={iconSize} color={colors.WHITE} />
     </TouchableOpacity>
   );
 };
@@ -19,22 +28,29 @@ const RoundIconBtn = ({ antIconName, size, color, onPress }) => {
 const styles = StyleSheet.create({
   iconContainer: {
     flexDirection: 'row',
-     height: 50,
-    width: 310,
-    // padding: 20,
+    backgroundColor: colors.SECONDARY,
+    height: 45,
+    width: 265,
     borderRadius: 15,
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 5,
-    //shadowOpacity: 1,
     gap: 10,
-    
+  },
+  tabletIconContainer: {
+    width: 450,
+    height: 65,
+    borderRadius: 20,
+    gap: 15,
   },
   btnName: {
     fontSize: 16,
     fontFamily: 'Montserrat',
     fontWeight: 'bold',
     color: 'white',
+  },
+  tabletBtnName: {
+    fontSize: 24, // Taille de police plus grande pour les tablettes
   },
 });
 

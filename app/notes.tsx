@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { Link, useRouter, useLocalSearchParams } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { useNavigation } from '@react-navigation/native';
+import { useDeviceType } from '../hooks/useDeviceType'; 
 import { Ionicons } from '@expo/vector-icons';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import colors from '../misc/colors';
+import BackButton from '@/components/BackButton';
+import { RichEditor } from 'react-native-pell-rich-editor';
 
 interface Note {
   id: string;
@@ -21,6 +24,7 @@ const Notes = () => {
   const { noteId } = useLocalSearchParams();
   const [note, setNote] = useState<Note | null>(null);
   const navigation = useNavigation();
+  const { isTabletOrMobileDevice, isTablet } = useDeviceType(); 
 
  
 
@@ -95,18 +99,24 @@ const Notes = () => {
 
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, isTablet && styles.containerTablet]}>
       <View style={styles.formHead}>
         <TouchableOpacity 
       onPress={handlePress}>
-          <Ionicons name="arrow-back" size={30} color='#114B5F' />
+          <BackButton  onPress={handlePress} color={colors.SECONDARY}  />
         </TouchableOpacity>
-        <Text style={styles.title}>My Note</Text>
+        <Text style={[styles.title, isTablet && styles.titleTablet]}>My Note</Text>
       </View>
       <View style={styles.notesContainer}>
-        <Text style={styles.titleNote}>{note.title}</Text>
+        <Text style={[styles.titleNote, isTablet && styles.titleNoteTablet]}>{note.title}</Text>
         <Text style={styles.date}>{note.date}</Text>
-        <Text style={styles.content}>{note.content}</Text>
+        <ScrollView style={styles.scrollView}>
+        <RichEditor
+            initialContentHTML={note.content}
+            disabled
+            style={styles.richTextEditor}
+          />
+        </ScrollView>
       </View>
       
       <View style={styles.buttonContainer}>
@@ -133,6 +143,11 @@ const styles = StyleSheet.create({
     padding: 16,
     backgroundColor: '#FFD4CA'
   },
+  containerTablet: {
+    flex: 1,
+    padding: 22,
+    backgroundColor: '#FFD4CA'
+  },
   formHead: {
     flexDirection: 'row',
     justifyContent:'space-between',
@@ -143,6 +158,13 @@ const styles = StyleSheet.create({
   },
   notesContainer : {
     flex : 1,
+    backgroundColor: 'white',
+    padding: 12,
+    borderWidth: 1,
+    borderRadius: 15,
+  },
+  scrollView : {
+   
   },
   title: {
     fontSize: 24,
@@ -150,14 +172,21 @@ const styles = StyleSheet.create({
     //marginBottom: 16,
     fontFamily: 'Montserrat',
     color: '#114B5F',
-    marginRight : 120,
+    //marginRight : 120,
     
+  },
+  titleTablet: {
+    fontSize: 36,
   },
   titleNote: {
     fontSize: 30,
     fontWeight: 'bold',
     marginBottom: 5,
     fontFamily: 'Montserrat',
+  },
+  titleNoteTablet: {
+    fontSize: 40,
+    
   },
   date: {
     fontSize: 12,
@@ -167,6 +196,11 @@ const styles = StyleSheet.create({
   },
   content: {
     fontSize: 18,
+    marginBottom: 16,
+    fontFamily: 'Montserrat',
+  },
+  contentTablet: {
+    fontSize: 24,
     marginBottom: 16,
     fontFamily: 'Montserrat',
   },
@@ -192,6 +226,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 16,
+    marginTop: 20,
 
   },
   buttonEdit: {
