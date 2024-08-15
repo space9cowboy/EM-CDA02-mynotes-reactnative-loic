@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { StyleSheet, Text, View, TextInput, StatusBar, TouchableOpacity, Animated, Image } from 'react-native';
+import { StyleSheet, Text, View, TextInput, StatusBar, TouchableOpacity, Animated, Image, KeyboardAvoidingView, Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -91,29 +91,33 @@ const Index = () => {
 
   return (
     <>
-      <StatusBar hidden />
-      <View style={[styles.main, isTabletOrMobileDevice && styles.mainTablet]}>
-        <Text style={[styles.title, isTabletOrMobileDevice && styles.tabletTitle]}>MyNotes</Text>
-        <View>
-          <Image source={require('../assets/images/mynotes1.png')}  style={[styles.image, isTabletOrMobileDevice && styles.tabletImage]} />
-        </View>
-        <Text  style={[styles.subtitle, isTabletOrMobileDevice && styles.tabletSubtitle]}>Enter your name to continue</Text>
-        <TextInput
-          value={name}
-          onChangeText={handleOnChangeText}
-          placeholder='Enter Name'
-          style={[styles.textInput, isTabletOrMobileDevice && styles.tabletTextInput]}
-        />
-        <Animated.View style={[styles.btnContainer, { opacity: fadeAnim, transform: [{ translateY: translateYAnim }] }]}>
-          {buttonVisible && (
-            <TouchableOpacity onPress={handleSubmit}>
-              <RoundIconBtn antIconName='arrowright' color={colors.PRIMARY}  onPress={handleSubmit} />
-            </TouchableOpacity>
-          )}
-        </Animated.View>
+    <StatusBar hidden />
+    <KeyboardAvoidingView
+      style={[styles.main, isTabletOrMobileDevice && styles.mainTablet]}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
+    >
+      <Text style={[styles.title, isTabletOrMobileDevice && styles.tabletTitle]}>MyNotes</Text>
+      <View>
+        <Image source={require('../assets/images/mynotes1.png')} style={[styles.image, isTabletOrMobileDevice && styles.tabletImage]} />
       </View>
-    </>
-  );
+      <Text style={[styles.subtitle, isTabletOrMobileDevice && styles.tabletSubtitle]}>Enter your name to continue</Text>
+      <TextInput
+        value={name}
+        onChangeText={handleOnChangeText}
+        placeholder='Enter Name'
+        style={[styles.textInput, isTabletOrMobileDevice && styles.tabletTextInput]}
+      />
+      <Animated.View style={[styles.btnContainer, { opacity: fadeAnim, transform: [{ translateY: translateYAnim }] }]}>
+        {buttonVisible && (
+          <TouchableOpacity onPress={handleSubmit}>
+            <RoundIconBtn antIconName='arrowright' color={colors.PRIMARY} onPress={handleSubmit} />
+          </TouchableOpacity>
+        )}
+      </Animated.View>
+    </KeyboardAvoidingView>
+  </>
+);
 };
 
 const styles = StyleSheet.create({

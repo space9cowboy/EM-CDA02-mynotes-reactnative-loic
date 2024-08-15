@@ -29,13 +29,13 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         fontFamily: 'Montserrat',
         borderRadius: 50,
-        shadowColor: "#000",
-        shadowOffset: {
-          width: 0.8,
-          height: 1,
-        },
-        shadowOpacity: 0.5,
-        shadowRadius: 10,
+        // shadowColor: "#000",
+        // shadowOffset: {
+        //   width: 0.8,
+        //   height: 1,
+        // },
+        // shadowOpacity: 0.5,
+        // shadowRadius: 10,
       },
       addButtonTablet: {
        

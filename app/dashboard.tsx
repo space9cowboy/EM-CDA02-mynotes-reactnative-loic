@@ -4,6 +4,7 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useDeviceType } from '../hooks/useDeviceType'; 
 import AddButton from '@/components/AddButton';
+import colors from '@/misc/colors';
 
 interface Note {
   id: string;
@@ -80,7 +81,7 @@ const Dashboard = () => {
       case 'Normal':
         return '#456990'; // Green
       case 'Pense bête':
-        return '#7EE4EC'; // Blue
+        return colors.LIGHT; // Blue
       default:
         return '#000000'; // Black
     }
@@ -319,12 +320,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Montserrat',
   },
   addButton: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 16,
-    backgroundColor: '#114B5F',
-    borderRadius: 50,
-    marginBottom: 32,
+    marginTop: 15,
   },
 });
 

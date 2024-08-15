@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'react-native';
 import { Link, useRouter, useLocalSearchParams } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
@@ -49,23 +49,32 @@ const Notes = () => {
     }, [noteId])
   );
 
-  const handleDelete = async () => {
-    try {
-      // Get the existing notes
-      const storedNotes = await AsyncStorage.getItem('notes');
-      const notes = storedNotes ? (JSON.parse(storedNotes) as Note[]) : [];
-
-      // Filter out the note to be deleted
-      const updatedNotes = notes.filter(n => n.id !== noteId);
-
-      // Save the updated notes back to AsyncStorage
-      await AsyncStorage.setItem('notes', JSON.stringify(updatedNotes));
-
-      // Navigate back to the dashboard
-      router.push('/dashboard');
-    } catch (error) {
-      console.error('Failed to delete note', error);
-    }
+  const handleDelete = () => {
+    Alert.alert(
+      "Confirmation de suppression",
+      "Êtes-vous sûr de vouloir supprimer cette note ?",
+      [
+        {
+          text: "Non",
+          style: "cancel",
+        },
+        {
+          text: "Oui",
+          onPress: async () => {
+            try {
+              const storedNotes = await AsyncStorage.getItem('notes');
+              const notes = storedNotes ? JSON.parse(storedNotes) : [];
+              const updatedNotes = notes.filter(n => n.id !== noteId);
+              await AsyncStorage.setItem('notes', JSON.stringify(updatedNotes));
+              router.push('/dashboard');
+            } catch (error) {
+              console.error('Failed to delete note', error);
+            }
+          },
+        },
+      ],
+      { cancelable: true }
+    );
   };
 
   if (!note) {
@@ -91,7 +100,7 @@ const Notes = () => {
       case 'Normal':
         return '#456990'; // Green
       case 'Pense bête':
-        return '#7EE4EC'; // Blue
+        return colors.LIGHT; // Blue
       default:
         return '#000000'; // Black
     }
@@ -103,7 +112,7 @@ const Notes = () => {
       <View style={styles.formHead}>
         <TouchableOpacity 
       onPress={handlePress}>
-          <BackButton  onPress={handlePress} color={colors.SECONDARY}  />
+          <BackButton  onPress={handlePress} color={colors.WHITE}  />
         </TouchableOpacity>
         <Text style={[styles.title, isTablet && styles.titleTablet]}>My Note</Text>
       </View>
@@ -141,7 +150,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: '#FFD4CA'
+    backgroundColor: colors.SECONDARY,
   },
   containerTablet: {
     flex: 1,
@@ -171,7 +180,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     //marginBottom: 16,
     fontFamily: 'Montserrat',
-    color: '#114B5F',
+    color: colors.WHITE,
     //marginRight : 120,
     
   },
@@ -233,7 +242,8 @@ const styles = StyleSheet.create({
     //flex: 1,
     padding: 20,
     borderRadius: 50,
-    backgroundColor: '#114B5F',
+
+    backgroundColor: colors.TERTIARY,
     alignItems: 'center',
     marginHorizontal: 4,
     //width : 100,
@@ -243,7 +253,7 @@ const styles = StyleSheet.create({
     //flex: 1,
     padding: 20,
     borderRadius: 50,
-    backgroundColor: '#114B5F',
+    backgroundColor: colors.TERTIARY,
     alignItems: 'center',
     marginHorizontal: 4,
   },
