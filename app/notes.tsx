@@ -116,6 +116,7 @@ const Notes = () => {
         </TouchableOpacity>
         <Text style={[styles.title, isTablet && styles.titleTablet]}>My Note</Text>
       </View>
+
       <View style={styles.notesContainer}>
         <Text style={[styles.titleNote, isTablet && styles.titleNoteTablet]}>{note.title}</Text>
         <Text style={styles.date}>{note.date}</Text>
@@ -129,16 +130,16 @@ const Notes = () => {
       </View>
       
       <View style={styles.buttonContainer}>
-      <TouchableOpacity onPress={handleEditPress} style={styles.buttonEdit}>
-        <AntDesign name="edit" size={30} color="white" />
+      <TouchableOpacity onPress={handleEditPress} style={[styles.buttonED, isTablet && styles.buttonEDTablet]}>
+        <AntDesign name="edit" size={isTablet ? styles.iconSizeTablet : styles.iconSize} color="white" />
       </TouchableOpacity>
         <View style={{ ...styles.priorityText, backgroundColor: getPriorityColor(note.priority) }}>
-          <Text style={styles.priority}>
+          <Text style={[styles.priority, isTablet && styles.priorityTablet]}>
           {note.priority}
           </Text>
         </View>
-        <TouchableOpacity onPress={handleDelete} style={styles.buttonDelete}>
-        <AntDesign name="delete" size={30} color="white" />
+        <TouchableOpacity onPress={handleDelete} style={[styles.buttonED, isTablet && styles.buttonEDTablet]}>
+        <AntDesign name="delete" size={isTablet ? styles.iconSizeTablet : styles.iconSize} color="white" />
         </TouchableOpacity>
       </View>
       
@@ -155,7 +156,7 @@ const styles = StyleSheet.create({
   containerTablet: {
     flex: 1,
     padding: 22,
-    backgroundColor: '#FFD4CA'
+    backgroundColor: colors.SECONDARY,
   },
   formHead: {
     flexDirection: 'row',
@@ -225,9 +226,17 @@ const styles = StyleSheet.create({
     fontFamily: 'Montserrat',
     
   },
+  priorityTablet: {
+    fontSize: 24,
+  },
   priorityText : {
-    
+    paddingHorizontal: 16,
+    justifyContent: 'center',
     borderRadius : 10,
+  },
+  priorityTextTablet: {
+    paddingHorizontal: 28,
+    
   },
  
   buttonContainer: {
@@ -238,7 +247,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
 
   },
-  buttonEdit: {
+  buttonED: {
     //flex: 1,
     padding: 20,
     borderRadius: 50,
@@ -249,6 +258,10 @@ const styles = StyleSheet.create({
     //width : 100,
    
   },
+  buttonEDTablet: {
+    padding: 30,
+    borderRadius: 60,
+  },
   buttonDelete: {
     //flex: 1,
     padding: 20,
@@ -257,6 +270,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginHorizontal: 4,
   },
+ 
   // buttonText: {
   //   fontSize: 18,
   //   color: '#FFF',
@@ -282,6 +296,14 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 20,
   },
+  // richTextEditor: {
+  //   fontSize: 40,
+  //   fontFamily: 'Montserrat',
+  // },
+   // Taille des icônes pour les appareils mobiles
+   iconSize: 30,
+   // Taille des icônes pour les tablettes
+   iconSizeTablet: 50,
 });
 
 export default Notes;

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform  } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Alert, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Keyboard, TouchableWithoutFeedback  } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
@@ -90,7 +90,7 @@ const Formulaire = () => {
   const renderPriorityButton = (priority: 'Important' | 'Normal' | 'Pense bête') => (
     <TouchableOpacity
       style={[
-        styles.priorityButton, isTablet && styles.impriorityButtonTablet,
+        styles.priorityButton, isTablet && styles.priorityButtonTablet,
         note.priority === priority && getSelectedPriorityButtonStyle(priority),
       ]}
       onPress={() => setNote(prevNote => ({ ...prevNote, priority }))}
@@ -103,12 +103,21 @@ const Formulaire = () => {
     </TouchableOpacity>
   );
 
+
+
+  
+  
+
   const handlePress = () => {
     if (noteId) {
       navigation.navigate('notes');
     } else {
       navigation.navigate('dashboard');
     }
+  };
+
+  const dismissKeyboard = () => {
+    Keyboard.dismiss();
   };
 
   return (
@@ -118,31 +127,39 @@ const Formulaire = () => {
     behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
   >
-    <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+    <TouchableWithoutFeedback onPress={dismissKeyboard}>
       <View style={styles.formHead}>
         <TouchableOpacity onPress={handlePress}>
           <BackButton onPress={handlePress} color={colors.WHITE} />
         </TouchableOpacity>
         <Text style={[styles.title, isTabletOrMobileDevice && styles.titleTablet]}>{noteId ? 'Edit Note' : 'Create Note'}</Text>
       </View>
+      </TouchableWithoutFeedback>
+      <ScrollView
+        style={[styles.scrollView, isTablet && styles.scrollViewTablet]}
+        contentContainerStyle={{ flexGrow: 1 }}
+        keyboardShouldPersistTaps="handled"
+        onScrollBeginDrag={dismissKeyboard} // Dismiss keyboard when scrolling starts
+      >
       <View style={[styles.richTextContainer, isTablet && styles.richTextContainerTablet]}>
         <TextInput
           style={[styles.inputTitle, isTabletOrMobileDevice && styles.inputTitleTablet]}
-          placeholder="Title"
-          placeholderTextColor="#FFFFFF" 
+          placeholder="Write your title here !"
+        placeholderTextColor="rgba(255, 255, 255, 0.5)"
           value={note.title}
           onChangeText={(text) => setNote(prev => ({ ...prev, title: text }))}
         />
-        <ScrollView style={styles.richTextScrollView} contentContainerStyle={{ flexGrow: 1 }}>
-          <RichEditor
-            ref={richText}
-            initialContentHTML={note.content}
-            onChange={(text) => setNote(prev => ({ ...prev, content: text }))}
-            placeholder="Write your cool content here :)"
-            style={styles.richTextEditorStyle}
-            initialHeight={370}
-          />
-        </ScrollView>
+       
+        <RichEditor
+          ref={richText}
+          initialContentHTML={note.content}
+          onChange={(text) => setNote(prev => ({ ...prev, content: text }))}
+          placeholder="Write your cool content here :)"
+          style={styles.richTextEditorStyle}
+         
+          initialHeight={isTablet ? 600 : 370}  // Change the initial height based on the device type
+        />
+        
         <RichToolbar
           editor={richText}
           selectedIconTint="grey"
@@ -157,7 +174,7 @@ const Formulaire = () => {
             actions.setStrikethrough,
             actions.setUnderline,
           ]}
-          style={styles.richTextToolbarStyle}
+          style={[styles.richTextToolbarStyle, isTablet && styles.richTextToolbarStyleTablet]}
         />
       </View>
       <View style={isTablet ? styles.rowLayoutTablet : null}>
@@ -170,10 +187,11 @@ const Formulaire = () => {
           {renderPriorityButton('Pense bête')}
         </View>
       </View>
+      </ScrollView>
       <TouchableOpacity onPress={handleSave}>
         <AddButton onPress={handleSave} />
       </TouchableOpacity>
-    </ScrollView>
+    
   </KeyboardAvoidingView>
 );
 };
@@ -218,10 +236,10 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 10,
   },
   inputTitleTablet: {
-    height: 50,
+    height: 70,
     marginBottom: 20,
     paddingHorizontal: 8,
-    backgroundColor: 'white',
+    backgroundColor: colors.SECONDARY,
     borderRadius: 5,
     fontSize: 25,
   },
@@ -234,7 +252,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   richTextContainerTablet: {
-    height: 300,
+    //height: 750,
   },
   richTextEditorStyle: {
     marginTop: -5,
@@ -259,6 +277,9 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 10,
     borderBottomRightRadius: 10,
     borderWidth: 1,
+  },
+  richTextToolbarStyleTablet: {
+    height: 70,
   },
   rowLayoutTablet: {
     flexDirection: 'row',
@@ -300,8 +321,10 @@ const styles = StyleSheet.create({
     
   },
   priorityButtonTablet: {
-    padding: 15,
+    
     marginHorizontal: 15,
+    paddingHorizontal: 27,
+    paddingVertical: 20,
   },
   priorityButtonText: {
     color: '#fff',
@@ -310,15 +333,22 @@ const styles = StyleSheet.create({
     fontFamily: 'Montserrat',
   },
   priorityButtonTextTablet: {
-    fontSize: 18,
+    fontSize: 24,
   },
   selectedPriorityButtonText: {
     color: '#fff',
   },
-  richTextScrollView: {
-    maxHeight: 370,
-    fontFamily: 'Montserrat', // Ajuste cette valeur selon tes besoins
+//   richTextScrollView: {
+//     maxHeight: 370,
+//     fontFamily: 'Montserrat', // Ajuste cette valeur selon tes besoins
+// },
+// richTextScrollViewTablet: {
+//   maxHeight: 750,  // Adjusted max height for tablet
+// },
+scrollViewTablet: {
+  height: 400,
 },
+
 });
 
 export default Formulaire;
