@@ -58,7 +58,7 @@ const Formulaire = () => {
     try {
       const storedNotes = await AsyncStorage.getItem('notes');
       const notes = storedNotes ? (JSON.parse(storedNotes) as Note[]) : [];
-
+  
       if (noteId) {
         const updatedNotes = notes.map(n => (n.id === noteId ? note : n));
         await AsyncStorage.setItem('notes', JSON.stringify(updatedNotes));
@@ -66,13 +66,15 @@ const Formulaire = () => {
         const newNote = { ...note, id: Date.now().toString(), createdAt: new Date().toISOString() };
         await AsyncStorage.setItem('notes', JSON.stringify([...notes, newNote]));
       }
-
+  
+      // Assurez-vous de naviguer en arrière après la mise à jour réussie
       navigation.navigate('dashboard');
     } catch (error) {
       console.error('Failed to save note', error);
       Alert.alert('Error', 'Failed to save note.');
     }
   };
+  
 
   const getSelectedPriorityButtonStyle = (priority) => {
     switch (priority) {
@@ -232,6 +234,7 @@ const styles = StyleSheet.create({
     //borderRadius: 10,
     fontFamily: 'Montserrat',
     fontSize: 18,
+    fontWeight: 'bold',
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
   },
@@ -255,7 +258,7 @@ const styles = StyleSheet.create({
     //height: 750,
   },
   richTextEditorStyle: {
-    marginTop: -5,
+    marginTop: -10,
     //borderWidth: 1,
     borderColor: '#ccaf9b',
     shadowColor: '#000',

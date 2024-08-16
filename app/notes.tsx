@@ -25,6 +25,7 @@ const Notes = () => {
   const [note, setNote] = useState<Note | null>(null);
   const navigation = useNavigation();
   const { isTabletOrMobileDevice, isTablet } = useDeviceType(); 
+  const [editorKey, setEditorKey] = useState(0);
 
  
 
@@ -38,16 +39,18 @@ const Notes = () => {
             const noteToView = notes.find(n => n.id === noteId);
             if (noteToView) {
               setNote(noteToView);
+              setEditorKey(prevKey => prevKey + 1); 
             }
           }
         } catch (error) {
           console.error('Failed to load note', error);
         }
       };
-
+  
       fetchNote();
-    }, [noteId])
+    }, [noteId]) // Ajout de noteId comme dépendance pour assurer le rechargement
   );
+  
 
   const handleDelete = () => {
     Alert.alert(
@@ -122,11 +125,12 @@ const Notes = () => {
         <Text style={styles.date}>{note.date}</Text>
         <ScrollView style={styles.scrollView}>
         <RichEditor
+            key={editorKey}  // Utilisation de l'état `editorKey` pour forcer le re-rendu
             initialContentHTML={note.content}
             disabled
-            style={styles.richTextEditor}
+            style={[styles.richTextEditor, isTablet && styles.richTextEditorTablet]}
           />
-        </ScrollView>
+</ScrollView>
       </View>
       
       <View style={styles.buttonContainer}>
