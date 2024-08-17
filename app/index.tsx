@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { 
-  StyleSheet, Text, View, TextInput, StatusBar, TouchableOpacity, 
+  StyleSheet, Text, View, TextInput, TouchableOpacity, 
   Animated, Image, KeyboardAvoidingView, Platform, 
   TouchableWithoutFeedback, Keyboard 
 } from 'react-native';
@@ -21,14 +21,16 @@ const Index = () => {
 
   const handleOnChangeText = (text: string) => {
     setName(text);
-    setButtonVisible(text.trim().length > 2);
+    setButtonVisible(text.trim().length >= 3 && text.trim().length <= 10);
   };
 
   const handleSubmit = async () => {
-    if (name.trim().length > 0) {
+    if (name.trim().length > 0 && name.trim().length <= 10) {
       const user = { name };
       await AsyncStorage.setItem('user', JSON.stringify(user));
       navigation.navigate('dashboard');
+    } else {
+      alert('Name must be between 1 and 10 characters long');
     }
   };
 
@@ -97,46 +99,44 @@ const Index = () => {
   };
 
   return (
-    <>
-      <StatusBar hidden />
-      <KeyboardAvoidingView
-        style={[styles.main, isTabletOrMobileDevice && styles.mainTablet]}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
-      >
-        <TouchableWithoutFeedback onPress={dismissKeyboard}>
-          <View style={styles.centeredView}>
-            <Text style={[styles.title, isTabletOrMobileDevice && styles.tabletTitle]}>
-              MyNotes
-            </Text>
-            <View>
-              <Image
-                source={require('../assets/images/mynotes1.png')}
-                style={[styles.image, isTabletOrMobileDevice && styles.tabletImage]}
-              />
-            </View>
-            <Text style={[styles.subtitle, isTabletOrMobileDevice && styles.tabletSubtitle]}>
-              Enter your name to continue
-            </Text>
-            <TextInput
-              value={name}
-              onChangeText={handleOnChangeText}
-              placeholder="Enter Name"
-              style={[styles.textInput, isTabletOrMobileDevice && styles.tabletTextInput]}
+    <KeyboardAvoidingView
+      style={[styles.main, isTabletOrMobileDevice && styles.mainTablet]}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
+    >
+      <TouchableWithoutFeedback onPress={dismissKeyboard}>
+        <View style={styles.centeredView}>
+          <Text style={[styles.title, isTabletOrMobileDevice && styles.tabletTitle]}>
+            MyNotes
+          </Text>
+          <View>
+            <Image
+              source={require('../assets/images/mynotes1.png')}
+              style={[styles.image, isTabletOrMobileDevice && styles.tabletImage]}
             />
-            <Animated.View
-              style={[styles.btnContainer, { opacity: fadeAnim, transform: [{ translateY: translateYAnim }] }]}
-            >
-              {buttonVisible && (
-                <TouchableOpacity onPress={handleSubmit}>
-                  <RoundIconBtn antIconName="arrowright" color={colors.PRIMARY} onPress={handleSubmit} />
-                </TouchableOpacity>
-              )}
-            </Animated.View>
           </View>
-        </TouchableWithoutFeedback>
-      </KeyboardAvoidingView>
-    </>
+          <Text style={[styles.subtitle, isTabletOrMobileDevice && styles.tabletSubtitle]}>
+            Enter your name to continue
+          </Text>
+          <TextInput
+            value={name}
+            onChangeText={handleOnChangeText}
+            placeholder="Enter Name"
+            style={[styles.textInput, isTabletOrMobileDevice && styles.tabletTextInput]}
+            maxLength={10} // Limite à 10 caractères
+          />
+          <Animated.View
+            style={[styles.btnContainer, { opacity: fadeAnim, transform: [{ translateY: translateYAnim }] }]}
+          >
+            {buttonVisible && (
+              <TouchableOpacity onPress={handleSubmit}>
+                <RoundIconBtn antIconName="arrowright" color={colors.PRIMARY} onPress={handleSubmit} />
+              </TouchableOpacity>
+            )}
+          </Animated.View>
+        </View>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -156,6 +156,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     width: '100%',
+    position: 'absolute',
   },
   title: {
     fontFamily: 'Montserrat',

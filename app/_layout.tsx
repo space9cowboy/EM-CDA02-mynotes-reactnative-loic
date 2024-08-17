@@ -29,9 +29,10 @@ export default function RootLayout() {
         <Stack>
           {/* <Stack.Screen name="(tabs)" options={{ headerShown: false }} /> */}
           <Stack.Screen name="+not-found" />
-          <Stack.Screen name="dashboard"   />
-          <Stack.Screen name="formulaire" />
-          <Stack.Screen name="notes" />
+          <Stack.Screen name="index" options={{ headerShown: false }}/>
+          <Stack.Screen name="dashboard" options={{ headerShown: false }}  />
+          <Stack.Screen name="formulaire" options={{ headerShown: false }}  />
+          <Stack.Screen name="notes" options={{ headerShown: false }} />
         </Stack>
       </ThemeProvider>
     </FontLoader>

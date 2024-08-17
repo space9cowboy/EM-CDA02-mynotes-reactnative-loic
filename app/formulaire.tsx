@@ -159,7 +159,7 @@ const Formulaire = () => {
           placeholder="Write your cool content here :)"
           style={styles.richTextEditorStyle}
          
-          initialHeight={isTablet ? 600 : 370}  // Change the initial height based on the device type
+          initialHeight={isTablet ? 600 : 420}  // Change the initial height based on the device type
         />
         
         <RichToolbar
@@ -181,7 +181,7 @@ const Formulaire = () => {
       </View>
       <View style={isTablet ? styles.rowLayoutTablet : null}>
         <Text style={[styles.label, isTablet && styles.labelTablet]}>
-          Priority:
+          Priority
         </Text>
         <View style={[styles.priorityContainer, isTablet && styles.priorityContainerTablet]}>
           {renderPriorityButton('Important')}
@@ -201,7 +201,8 @@ const Formulaire = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 15,
+    paddingHorizontal: 20,
+    paddingTop: 60,
     backgroundColor: '#456990',
   },
   containerTablet: {
@@ -296,6 +297,7 @@ const styles = StyleSheet.create({
     marginRight: 20,
     color: 'white',
     fontFamily: 'Montserrat',
+    fontWeight: 'bold',
   },
   labelTablet: {
     fontSize: 26,
@@ -317,7 +319,7 @@ const styles = StyleSheet.create({
     //padding: 12,
     paddingHorizontal: 17,
     paddingVertical: 10,
-    borderRadius: 5,
+    borderRadius: 20,
     marginHorizontal: 20,
     borderWidth: 1,
     borderColor: 'white',

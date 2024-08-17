@@ -4,6 +4,7 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useDeviceType } from '../hooks/useDeviceType'; 
 import AddButton from '@/components/AddButton';
+import BackButton from '@/components/BackButton';
 import colors from '@/misc/colors';
 
 interface Note {
@@ -100,6 +101,10 @@ const Dashboard = () => {
     navigation.navigate('notes', { noteId });
   };
 
+  const GoBackToIndex = () => {
+    navigation.navigate('index')
+  };
+
   const handleFilterChange = (filter: string) => {
     setSelectedFilter(filter);
     if (filter === 'All') {
@@ -116,9 +121,17 @@ const Dashboard = () => {
 
   return (
     <View style={[styles.container, isTabletOrMobileDevice && styles.containerTablet]}>
-      <Text style={[styles.title, isTabletOrMobileDevice && styles.titleTablet]}>
+      
+
+      <View style={styles.formHead}>
+        <TouchableOpacity 
+      onPress={GoBackToIndex}>
+          <BackButton  onPress={GoBackToIndex} color={colors.WHITE}  />
+        </TouchableOpacity>
+        <Text style={[styles.title, isTabletOrMobileDevice && styles.titleTablet]}>
         {`Good ${greet}, ${user.name}`}
       </Text>
+      </View>
 
       <ScrollView 
         horizontal 
@@ -191,17 +204,30 @@ const Dashboard = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
+    paddingHorizontal: 20,
+    paddingTop: 60,
     backgroundColor: '#456990',
     justifyContent: 'space-between',
+    
+
   },
   containerTablet: {
     padding: 32,
+    paddingHorizontal: 16,
+    paddingVertical: 55,
+  },
+  formHead: {
+    flexDirection: 'row',
+    justifyContent:'space-between',
+    alignItems: 'center',
+    alignContent: 'center',
+    marginBottom: 25,
+    
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 16,
+    //marginBottom: 26,
     fontFamily: 'Montserrat',
     alignSelf: 'center',
     color: 'white',
@@ -212,6 +238,7 @@ const styles = StyleSheet.create({
   },
   filterScrollView: {
     marginBottom: 16,
+    //height: '50%',
   },
   filterScrollViewTablet: {
     marginBottom: 19,
@@ -224,10 +251,12 @@ const styles = StyleSheet.create({
   },
   filterButton: {
     paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 5,
-    backgroundColor: '#114B5F',
-    marginRight: 16,
+    paddingHorizontal: 19,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: colors.WHITE,
+    backgroundColor: colors.TERTIARY,
+    marginRight: 12,
     height: 40,
     alignItems: 'center',
   },
@@ -235,13 +264,13 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     paddingHorizontal: 29,
     borderRadius: 10,
-    backgroundColor: '#114B5F',
+    
     marginRight: 18,
     height: 65,
     alignItems: 'center',
   },
   selectedFilterButton: {
-    backgroundColor: '#7EE4EC',
+    backgroundColor: colors.WHITE,
   },
   filterButtonText: {
     color: 'white',
@@ -252,6 +281,7 @@ const styles = StyleSheet.create({
   },
   selectedFilterButtonText: {
     fontWeight: 'bold',
+    color: colors.TERTIARY,
   },
   scrollView: {
     height: '70%',

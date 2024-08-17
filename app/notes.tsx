@@ -121,6 +121,11 @@ const Notes = () => {
       </View>
 
       <View style={styles.notesContainer}>
+      <View style={{ ...styles.priorityText, backgroundColor: getPriorityColor(note.priority) }}>
+          <Text style={[styles.priority, isTablet && styles.priorityTablet]}>
+          {note.priority}
+          </Text>
+        </View>
         <Text style={[styles.titleNote, isTablet && styles.titleNoteTablet]}>{note.title}</Text>
         <Text style={styles.date}>{note.date}</Text>
         <ScrollView style={styles.scrollView}>
@@ -130,22 +135,20 @@ const Notes = () => {
             disabled
             style={[styles.richTextEditor, isTablet && styles.richTextEditorTablet]}
           />
-</ScrollView>
-      </View>
-      
+        </ScrollView>
+
       <View style={styles.buttonContainer}>
       <TouchableOpacity onPress={handleEditPress} style={[styles.buttonED, isTablet && styles.buttonEDTablet]}>
         <AntDesign name="edit" size={isTablet ? styles.iconSizeTablet : styles.iconSize} color="white" />
       </TouchableOpacity>
-        <View style={{ ...styles.priorityText, backgroundColor: getPriorityColor(note.priority) }}>
-          <Text style={[styles.priority, isTablet && styles.priorityTablet]}>
-          {note.priority}
-          </Text>
-        </View>
-        <TouchableOpacity onPress={handleDelete} style={[styles.buttonED, isTablet && styles.buttonEDTablet]}>
+        
+        <TouchableOpacity onPress={handleDelete} style={[styles.buttonDelete, isTablet && styles.buttonEDTablet]}>
         <AntDesign name="delete" size={isTablet ? styles.iconSizeTablet : styles.iconSize} color="white" />
         </TouchableOpacity>
       </View>
+
+      </View>
+      
       
     </View>
   );
@@ -154,8 +157,10 @@ const Notes = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
-    backgroundColor: colors.SECONDARY,
+    paddingHorizontal: 20,
+    paddingTop: 60,
+    paddingBottom: 20,
+    backgroundColor: colors.PRIMARY,
   },
   containerTablet: {
     flex: 1,
@@ -173,9 +178,13 @@ const styles = StyleSheet.create({
   notesContainer : {
     flex : 1,
     backgroundColor: 'white',
-    padding: 12,
+    padding: 16,
+    //paddingRight: 20,
+    //width: '110%',
+    //height: '100%',
     borderWidth: 1,
-    borderRadius: 15,
+    borderRadius: 30,
+    borderColor: colors.LIGHT,
   },
   scrollView : {
    
@@ -193,10 +202,11 @@ const styles = StyleSheet.create({
     fontSize: 36,
   },
   titleNote: {
-    fontSize: 30,
+    fontSize: 26,
     fontWeight: 'bold',
     marginBottom: 5,
     fontFamily: 'Montserrat',
+    marginLeft: 10,
   },
   titleNoteTablet: {
     fontSize: 40,
@@ -206,12 +216,14 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#888',
     marginBottom: 16,
+    marginLeft: 10,
     fontFamily: 'Montserrat',
   },
   content: {
     fontSize: 18,
     marginBottom: 16,
     fontFamily: 'Montserrat',
+    //width: '50%',
   },
   contentTablet: {
     fontSize: 24,
@@ -221,13 +233,14 @@ const styles = StyleSheet.create({
   priority: {
     fontSize: 16,
     fontWeight: 'bold',
-    padding: 25,
+    padding: 10,
     //borderRadius: 25,
     textAlign: 'center',
     //backgroundColor: 'blue',
     alignSelf: 'center',
     //marginBottom: 16,
     fontFamily: 'Montserrat',
+    //width: '50%',
     
   },
   priorityTablet: {
@@ -236,7 +249,10 @@ const styles = StyleSheet.create({
   priorityText : {
     paddingHorizontal: 16,
     justifyContent: 'center',
-    borderRadius : 10,
+    borderRadius : 25,
+    width: '50%',
+    marginBottom: 20,
+    
   },
   priorityTextTablet: {
     paddingHorizontal: 28,
@@ -247,8 +263,9 @@ const styles = StyleSheet.create({
     //width: '100%',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 16,
+    marginBottom: 5,
     marginTop: 20,
+    
 
   },
   buttonED: {
@@ -270,7 +287,7 @@ const styles = StyleSheet.create({
     //flex: 1,
     padding: 20,
     borderRadius: 50,
-    backgroundColor: colors.TERTIARY,
+    backgroundColor: colors.ERROR,
     alignItems: 'center',
     marginHorizontal: 4,
   },
@@ -300,6 +317,10 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 20,
   },
+  // richTextEditor: {
+  //   height: 200,
+  // },
+
   // richTextEditor: {
   //   fontSize: 40,
   //   fontFamily: 'Montserrat',
