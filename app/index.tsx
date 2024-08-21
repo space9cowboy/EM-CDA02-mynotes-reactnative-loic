@@ -1,8 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   StyleSheet, Text, View, TextInput, TouchableOpacity, 
-  Animated, Image, KeyboardAvoidingView, Platform, 
-  TouchableWithoutFeedback, Keyboard 
+  KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, Image
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -13,13 +12,11 @@ import { useDeviceType } from '../hooks/useDeviceType';
 const Index = () => {
   const [name, setName] = useState('');
   const [buttonVisible, setButtonVisible] = useState(false);
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const translateYAnim = useRef(new Animated.Value(20)).current;
-  const colorAnim = useRef(new Animated.Value(0)).current;
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
   const navigation = useNavigation();
   const { isTabletOrMobileDevice } = useDeviceType(); 
 
-  const handleOnChangeText = (text: string) => {
+  const handleOnChangeText = (text) => {
     setName(text);
     setButtonVisible(text.trim().length >= 3 && text.trim().length <= 10);
   };
@@ -35,76 +32,37 @@ const Index = () => {
   };
 
   useEffect(() => {
-    if (buttonVisible) {
-      showButton();
-      animateGradient(1);
-    } else {
-      hideButton();
-      animateGradient(0);
-    }
-  }, [buttonVisible]);
-
-  useEffect(() => {
     const resetStateOnFocus = navigation.addListener('focus', () => {
       setName('');
       setButtonVisible(false);
-      colorAnim.setValue(0);
-      fadeAnim.setValue(0);
-      translateYAnim.setValue(20);
+      setKeyboardVisible(false);
+      Keyboard.dismiss();
     });
 
     return resetStateOnFocus;
   }, [navigation]);
 
-  const showButton = () => {
-    Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 200,
-        useNativeDriver: true,
-      }),
-      Animated.timing(translateYAnim, {
-        toValue: 0,
-        duration: 200,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  };
+  // Gestion du clavier
+  useEffect(() => {
+    const keyboardDidShow = () => setKeyboardVisible(true);
+    const keyboardDidHide = () => setKeyboardVisible(false);
 
-  const hideButton = () => {
-    Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 0,
-        duration: 200,
-        useNativeDriver: true,
-      }),
-      Animated.timing(translateYAnim, {
-        toValue: 20,
-        duration: 200,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  };
+    const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', keyboardDidShow);
+    const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', keyboardDidHide);
 
-  const animateGradient = (toValue: number) => {
-    Animated.timing(colorAnim, {
-      toValue,
-      duration: 200,
-      useNativeDriver: false,
-    }).start();
-  };
-
-  const dismissKeyboard = () => {
-    Keyboard.dismiss();
-  };
+    return () => {
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
+    };
+  }, []);
 
   return (
     <KeyboardAvoidingView
       style={[styles.main, isTabletOrMobileDevice && styles.mainTablet]}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
     >
-      <TouchableWithoutFeedback onPress={dismissKeyboard}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={styles.centeredView}>
           <Text style={[styles.title, isTabletOrMobileDevice && styles.tabletTitle]}>
             MyNotes
@@ -123,17 +81,13 @@ const Index = () => {
             onChangeText={handleOnChangeText}
             placeholder="Enter Name"
             style={[styles.textInput, isTabletOrMobileDevice && styles.tabletTextInput]}
-            maxLength={10} // Limite à 10 caractères
+            maxLength={10}
           />
-          <Animated.View
-            style={[styles.btnContainer, { opacity: fadeAnim, transform: [{ translateY: translateYAnim }] }]}
-          >
-            {buttonVisible && (
-              <TouchableOpacity onPress={handleSubmit}>
-                <RoundIconBtn antIconName="arrowright" color={colors.PRIMARY} onPress={handleSubmit} />
-              </TouchableOpacity>
-            )}
-          </Animated.View>
+          {buttonVisible && (
+            <TouchableOpacity onPress={handleSubmit}>
+              <RoundIconBtn antIconName="arrowright" color={colors.PRIMARY} onPress={handleSubmit} />
+            </TouchableOpacity>
+          )}
         </View>
       </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
@@ -156,7 +110,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     width: '100%',
-    position: 'absolute',
+    paddingHorizontal: 20,
   },
   title: {
     fontFamily: 'Montserrat',
@@ -207,10 +161,6 @@ const styles = StyleSheet.create({
     fontSize: 28,
     height: 65,
     borderRadius: 20,
-  },
-  btnContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
   },
 });
 

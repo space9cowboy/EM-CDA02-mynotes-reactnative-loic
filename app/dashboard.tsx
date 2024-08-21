@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Keyboard } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useDeviceType } from '../hooks/useDeviceType'; 
@@ -82,7 +82,7 @@ const Dashboard = () => {
       case 'Normal':
         return '#456990'; // Green
       case 'Pense bête':
-        return colors.LIGHT; // Blue
+        return colors.PRIMARY; // Blue
       default:
         return '#000000'; // Black
     }
@@ -103,6 +103,7 @@ const Dashboard = () => {
 
   const GoBackToIndex = () => {
     navigation.navigate('index')
+    Keyboard.dismiss();
   };
 
   const handleFilterChange = (filter: string) => {

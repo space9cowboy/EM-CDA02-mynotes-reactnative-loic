@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Keyboard, TouchableWithoutFeedback  } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Alert, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Keyboard, TouchableWithoutFeedback } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Ionicons } from '@expo/vector-icons';
 import colors from '../misc/colors';
 import { useDeviceType } from '../hooks/useDeviceType'; 
 import BackButton from '@/components/BackButton';
@@ -67,14 +66,12 @@ const Formulaire = () => {
         await AsyncStorage.setItem('notes', JSON.stringify([...notes, newNote]));
       }
   
-      // Assurez-vous de naviguer en arrière après la mise à jour réussie
       navigation.navigate('dashboard');
     } catch (error) {
       console.error('Failed to save note', error);
       Alert.alert('Error', 'Failed to save note.');
     }
   };
-  
 
   const getSelectedPriorityButtonStyle = (priority) => {
     switch (priority) {
@@ -83,7 +80,7 @@ const Formulaire = () => {
       case 'Normal':
         return { backgroundColor: '#114B5F', borderWidth: 1, borderColor: '#114B5F'  };
       case 'Pense bête':
-        return { backgroundColor: colors.LIGHT, borderWidth: 1, borderColor: colors.LIGHT  };
+        return { backgroundColor: colors.PRIMARY, borderWidth: 1, borderColor: colors.PRIMARY };
       default:
         return {};
     }
@@ -92,7 +89,8 @@ const Formulaire = () => {
   const renderPriorityButton = (priority: 'Important' | 'Normal' | 'Pense bête') => (
     <TouchableOpacity
       style={[
-        styles.priorityButton, isTablet && styles.priorityButtonTablet,
+        styles.priorityButton, 
+        isTablet && styles.priorityButtonTablet,
         note.priority === priority && getSelectedPriorityButtonStyle(priority),
       ]}
       onPress={() => setNote(prevNote => ({ ...prevNote, priority }))}
@@ -100,15 +98,13 @@ const Formulaire = () => {
       <Text style={[
         styles.priorityButtonText,
         isTablet && styles.priorityButtonTextTablet,
-        note.priority === priority && styles.selectedPriorityButtonText
-      ]}>{priority}</Text>
+        note.priority === priority && priority === 'Pense bête' ? styles.selectedPenseBeteText : styles.defaultPriorityText,
+        note.priority === priority && priority !== 'Pense bête' && styles.selectedPriorityButtonText,
+      ]}>
+        {priority}
+      </Text>
     </TouchableOpacity>
   );
-
-
-
-  
-  
 
   const handlePress = () => {
     if (noteId) {
@@ -123,19 +119,20 @@ const Formulaire = () => {
   };
 
   return (
-    
     <KeyboardAvoidingView
-    style={[styles.container, isTabletOrMobileDevice && styles.containerTablet]}
-    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
-  >
-    <TouchableWithoutFeedback onPress={dismissKeyboard}>
-      <View style={styles.formHead}>
-        <TouchableOpacity onPress={handlePress}>
-          <BackButton onPress={handlePress} color={colors.WHITE} />
-        </TouchableOpacity>
-        <Text style={[styles.title, isTabletOrMobileDevice && styles.titleTablet]}>{noteId ? 'Edit Note' : 'Create Note'}</Text>
-      </View>
+      style={[styles.container, isTabletOrMobileDevice && styles.containerTablet]}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+    >
+      <TouchableWithoutFeedback onPress={dismissKeyboard}>
+        <View style={styles.formHead}>
+          <TouchableOpacity onPress={handlePress}>
+            <BackButton onPress={handlePress} color={colors.WHITE} />
+          </TouchableOpacity>
+          <Text style={[styles.title, isTabletOrMobileDevice && styles.titleTablet]}>
+            {noteId ? 'Edit Note' : 'Create Note'}
+          </Text>
+        </View>
       </TouchableWithoutFeedback>
       <ScrollView
         style={[styles.scrollView, isTablet && styles.scrollViewTablet]}
@@ -143,59 +140,56 @@ const Formulaire = () => {
         keyboardShouldPersistTaps="handled"
         onScrollBeginDrag={dismissKeyboard} // Dismiss keyboard when scrolling starts
       >
-      <View style={[styles.richTextContainer, isTablet && styles.richTextContainerTablet]}>
-        <TextInput
-          style={[styles.inputTitle, isTabletOrMobileDevice && styles.inputTitleTablet]}
-          placeholder="Write your title here !"
-        placeholderTextColor="rgba(255, 255, 255, 0.5)"
-          value={note.title}
-          onChangeText={(text) => setNote(prev => ({ ...prev, title: text }))}
-        />
-       
-        <RichEditor
-          ref={richText}
-          initialContentHTML={note.content}
-          onChange={(text) => setNote(prev => ({ ...prev, content: text }))}
-          placeholder="Write your cool content here :)"
-          style={styles.richTextEditorStyle}
-         
-          initialHeight={isTablet ? 600 : 420}  // Change the initial height based on the device type
-        />
-        
-        <RichToolbar
-          editor={richText}
-          selectedIconTint="grey"
-          iconTint={colors.WHITE}
-          actions={[
-            actions.insertImage,
-            actions.setBold,
-            actions.setItalic,
-            actions.insertBulletsList,
-            actions.insertOrderedList,
-            actions.insertLink,
-            actions.setStrikethrough,
-            actions.setUnderline,
-          ]}
-          style={[styles.richTextToolbarStyle, isTablet && styles.richTextToolbarStyleTablet]}
-        />
-      </View>
-      <View style={isTablet ? styles.rowLayoutTablet : null}>
-        <Text style={[styles.label, isTablet && styles.labelTablet]}>
-          Priority
-        </Text>
-        <View style={[styles.priorityContainer, isTablet && styles.priorityContainerTablet]}>
-          {renderPriorityButton('Important')}
-          {renderPriorityButton('Normal')}
-          {renderPriorityButton('Pense bête')}
+        <View style={[styles.richTextContainer, isTablet && styles.richTextContainerTablet]}>
+          <TextInput
+            style={[styles.inputTitle, isTabletOrMobileDevice && styles.inputTitleTablet]}
+            placeholder="Write your title here !"
+            placeholderTextColor="rgba(255, 255, 255, 0.5)"
+            value={note.title}
+            onChangeText={(text) => setNote(prev => ({ ...prev, title: text }))}
+          />
+          <RichEditor
+            ref={richText}
+            initialContentHTML={note.content}
+            onChange={(text) => setNote(prev => ({ ...prev, content: text }))}
+            placeholder="Write your cool content here :)"
+            style={styles.richTextEditorStyle}
+            initialHeight={isTablet ? 600 : 420}
+          />
+          <RichToolbar
+            editor={richText}
+            selectedIconTint="grey"
+            iconTint={colors.WHITE}
+            actions={[
+              actions.insertImage,
+              actions.setBold,
+              actions.setItalic,
+              actions.insertBulletsList,
+              actions.insertOrderedList,
+              actions.insertLink,
+              actions.setStrikethrough,
+              actions.setUnderline,
+            ]}
+            style={[styles.richTextToolbarStyle, isTablet && styles.richTextToolbarStyleTablet]}
+          />
         </View>
-      </View>
-      </ScrollView>
-      <TouchableOpacity onPress={handleSave}>
+        <View style={isTablet ? styles.rowLayoutTablet : null}>
+          <Text style={[styles.label, isTablet && styles.labelTablet]}>
+            Priority
+          </Text>
+          <View style={[styles.priorityContainer, isTablet && styles.priorityContainerTablet]}>
+            {renderPriorityButton('Important')}
+            {renderPriorityButton('Normal')}
+            {renderPriorityButton('Pense bête')}
+          </View>
+        </View>
+      
+      <TouchableOpacity >
         <AddButton onPress={handleSave} />
       </TouchableOpacity>
-    
-  </KeyboardAvoidingView>
-);
+      </ScrollView>
+    </KeyboardAvoidingView>
+  );
 };
 
 const styles = StyleSheet.create({
@@ -227,12 +221,10 @@ const styles = StyleSheet.create({
   inputTitle: {
     height: 45,
     borderColor: '#ccc',
-    //borderWidth: 1,
     marginBottom: 16,
     paddingHorizontal: 8,
     backgroundColor: colors.SECONDARY,
     color: 'white',
-    //borderRadius: 10,
     fontFamily: 'Montserrat',
     fontSize: 18,
     fontWeight: 'bold',
@@ -248,32 +240,22 @@ const styles = StyleSheet.create({
     fontSize: 25,
   },
   richTextContainer: {
-    //flex: 1,
     marginBottom: 16,
-    //height: 400,
     fontFamily: 'Montserrat',
     backgroundColor: 'white',
     borderRadius: 10,
   },
-  richTextContainerTablet: {
-    //height: 750,
-  },
+  richTextContainerTablet: {},
   richTextEditorStyle: {
     marginTop: -10,
-    //borderWidth: 1,
     borderColor: '#ccaf9b',
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.23,
     shadowRadius: 2.62,
     elevation: 4,
     fontSize: 20,
     fontFamily: 'Montserrat',
-    //height: 200,
-    //
   },
   richTextToolbarStyle: {
     backgroundColor: colors.SECONDARY,
@@ -289,7 +271,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'baseline',
     justifyContent: 'center',
-    //marginBottom: 100,
   },
   label: {
     fontSize: 16,
@@ -307,7 +288,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     justifyContent: 'space-around',
     gap: 10,
-    
   },
   priorityContainerTablet: {
     flexDirection: 'row',
@@ -316,17 +296,14 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   priorityButton: {
-    //padding: 12,
     paddingHorizontal: 17,
     paddingVertical: 10,
     borderRadius: 20,
     marginHorizontal: 20,
     borderWidth: 1,
     borderColor: 'white',
-    
   },
   priorityButtonTablet: {
-    
     marginHorizontal: 15,
     paddingHorizontal: 27,
     paddingVertical: 20,
@@ -343,17 +320,12 @@ const styles = StyleSheet.create({
   selectedPriorityButtonText: {
     color: '#fff',
   },
-//   richTextScrollView: {
-//     maxHeight: 370,
-//     fontFamily: 'Montserrat', // Ajuste cette valeur selon tes besoins
-// },
-// richTextScrollViewTablet: {
-//   maxHeight: 750,  // Adjusted max height for tablet
-// },
-scrollViewTablet: {
-  height: 400,
-},
-
+  selectedPenseBeteText: {
+    color: '#000',
+  },
+  scrollViewTablet: {
+    height: 400,
+  },
 });
 
 export default Formulaire;

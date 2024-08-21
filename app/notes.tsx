@@ -103,7 +103,7 @@ const Notes = () => {
       case 'Normal':
         return '#456990'; // Green
       case 'Pense bête':
-        return colors.LIGHT; // Blue
+        return colors.PRIMARY // Blue
       default:
         return '#000000'; // Black
     }
@@ -115,7 +115,7 @@ const Notes = () => {
       <View style={styles.formHead}>
         <TouchableOpacity 
       onPress={handlePress}>
-          <BackButton  onPress={handlePress} color={colors.WHITE}  />
+          <BackButton  onPress={handlePress} color={colors.SECONDARY}  />
         </TouchableOpacity>
         <Text style={[styles.title, isTablet && styles.titleTablet]}>My Note</Text>
       </View>
@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 60,
     paddingBottom: 20,
-    backgroundColor: colors.PRIMARY,
+    backgroundColor: colors.LIGHT,
   },
   containerTablet: {
     flex: 1,
@@ -182,9 +182,9 @@ const styles = StyleSheet.create({
     //paddingRight: 20,
     //width: '110%',
     //height: '100%',
-    borderWidth: 1,
+    borderWidth: 4,
     borderRadius: 30,
-    borderColor: colors.LIGHT,
+    borderColor: colors.SECONDARY,
   },
   scrollView : {
    
@@ -194,7 +194,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     //marginBottom: 16,
     fontFamily: 'Montserrat',
-    color: colors.WHITE,
+    color: colors.SECONDARY,
     //marginRight : 120,
     
   },
@@ -241,6 +241,7 @@ const styles = StyleSheet.create({
     //marginBottom: 16,
     fontFamily: 'Montserrat',
     //width: '50%',
+    color: colors.WHITE,
     
   },
   priorityTablet: {
@@ -252,6 +253,7 @@ const styles = StyleSheet.create({
     borderRadius : 25,
     width: '50%',
     marginBottom: 20,
+    
     
   },
   priorityTextTablet: {
