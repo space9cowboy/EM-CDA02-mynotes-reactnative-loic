@@ -1,20 +1,53 @@
-# Welcome to your Expo app 👋
+# AZIENDA MyNotes 👋
 
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
 
+
+# Project Overview
+AZIENDA Notes is a mobile application developed for AZIENDA, a global digital company, to streamline note-taking during meetings. The app allows employees to manage their notes uniformly, ensuring better productivity and control over company data. The application is designed to work on both Android and iOS platforms and focuses on providing a seamless note-taking experience with essential features like note creation, editing, deletion, and prioritization.
+
+# Features
+Note Management: Create, view, edit, and delete notes.
+Data Persistence: Notes are stored locally on the device, ensuring they remain accessible even after the device is restarted.
+Priority Levels: Assign priority to notes (Important, Normal, Low) using a color-coding system.
+Responsive Design: The application adapts to different screen sizes and orientations (mobile, tablet, portrait, landscape).
+Multi-Platform Support: Available on both Android and iOS.
+
+# Tech Stack
+Framework: React Native
+Language: JavaScript/TypeScript
+Storage: Local storage for data persistence
+Version Control: Git (hosted on GitHub)
+Design: Typography - Montserrat, AZIENDA's official color palette
+
 ## Get started
 
-1. Install dependencies
+1. Clone the Repository
+ ```bash
+   https://github.com/space9cowboy/EM-CDA02-mynotes-reactnative-loic.git
+   ```
+
+2. Install dependencies
 
    ```bash
    npm install
    ```
 
-2. Start the app
+3. Start the app
 
    ```bash
     npx expo start
    ```
+
+# Usage
+Dashboard: View all your notes. Click on any note to view or edit it.
+Create/Edit Note: Use the form to input the note's title, content, and priority. Save the note to store it locally.
+Delete Note: Delete any note by confirming the action in a modal dialog.
+
+# Screens
+Dashboard: Displays all notes as cards with title, date, content preview, and priority color.
+Note Details: Shows full details of a selected note with options to edit or delete.
+Note Form: A form to create or edit notes, including title, content, and priority selection.
 
 In the output, you'll find options to open the app in a
 
@@ -25,27 +58,5 @@ In the output, you'll find options to open the app in a
 
 You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
 
-## Get a fresh project
 
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
 # EM-CDA02-mynotes-reactnative-loic
