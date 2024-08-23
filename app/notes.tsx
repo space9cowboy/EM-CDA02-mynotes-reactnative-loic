@@ -1,22 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'react-native';
-import { Link, useRouter, useLocalSearchParams } from 'expo-router';
+import {  useRouter, useLocalSearchParams } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { useNavigation } from '@react-navigation/native';
 import { useDeviceType } from '../hooks/useDeviceType'; 
-import { Ionicons } from '@expo/vector-icons';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import colors from '../misc/colors';
 import BackButton from '@/components/BackButton';
 import { RichEditor } from 'react-native-pell-rich-editor';
+import useOrientation from '../hooks/useOrientation';
+import { ORIENTATION } from '../constants/orientation/index';
 
 interface Note {
   id: string;
   title: string;
   date: string;
   content: string;
-  priority: 'Important' | 'Normal' | 'Pense bête';
+  priority: 'Important' | 'Normal' | 'Reminder';
 }
 
 const Notes = () => {
@@ -26,6 +27,7 @@ const Notes = () => {
   const navigation = useNavigation();
   const { isTabletOrMobileDevice, isTablet } = useDeviceType(); 
   const [editorKey, setEditorKey] = useState(0);
+  const orientation = useOrientation();
 
  
 
@@ -51,11 +53,11 @@ const Notes = () => {
     }, [noteId]) // Ajout de noteId comme dépendance pour assurer le rechargement
   );
   
-
+// Fonction pour la suppression de notes 
   const handleDelete = () => {
     Alert.alert(
-      "Confirmation de suppression",
-      "Êtes-vous sûr de vouloir supprimer cette note ?",
+      "Confirm deletion",
+      "Are you sure ou want to delete this note ? ",
       [
         {
           text: "Non",
@@ -80,6 +82,7 @@ const Notes = () => {
     );
   };
 
+  //Loader
   if (!note) {
     return (
       <View style={styles.container}>
@@ -87,6 +90,33 @@ const Notes = () => {
       </View>
     );
   }
+
+ 
+
+ /**
+  * The function `getPriorityColor` takes a priority string as input and returns a corresponding color
+  * based on the priority level.
+  * @param {string} priority - The `getPriorityColor` function takes a `priority` parameter, which is a
+  * string indicating the priority level. The function then returns a color based on the priority level
+  * provided. The color returned depends on the priority level as follows:
+  * @returns The `getPriorityColor` function returns a color based on the priority input. If the
+  * priority is 'Important', it returns the color represented by `colors.ERROR`. If the priority is
+  * 'Normal', it returns the color represented by `colors.SECONDARY`. If the priority is 'Reminder', it
+  * returns the color represented by `colors.PRIMARY`. If the priority does not match any of these
+  * cases
+  */
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'Important':
+        return colors.ERROR; 
+      case 'Normal':
+        return colors.SECONDARY; 
+      case 'Reminder':
+        return colors.PRIMARY 
+      default:
+        return '#000000'; 
+    }
+  };
 
   const handlePress = () => {
     navigation.navigate('dashboard');
@@ -96,31 +126,18 @@ const Notes = () => {
     navigation.navigate('formulaire', { noteId: note.id });
   };
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'Important':
-        return '#F45B69'; // Red
-      case 'Normal':
-        return '#456990'; // Green
-      case 'Pense bête':
-        return colors.PRIMARY // Blue
-      default:
-        return '#000000'; // Black
-    }
-  };
-
 
   return (
-    <View style={[styles.container, isTablet && styles.containerTablet]}>
+    <View style={[orientation === ORIENTATION.PORTRAIT ? styles.container : styles.containerLandscape, isTabletOrMobileDevice && styles.containerTablet]}>
       <View style={styles.formHead}>
         <TouchableOpacity 
       onPress={handlePress}>
-          <BackButton  onPress={handlePress} color={colors.SECONDARY}  />
+          <BackButton  onPress={handlePress} color={colors.SECONDARY} size={30} />
         </TouchableOpacity>
         <Text style={[styles.title, isTablet && styles.titleTablet]}>My Note</Text>
       </View>
 
-      <View style={styles.notesContainer}>
+      <View style={orientation === ORIENTATION.PORTRAIT ? styles.notesContainer : styles.notesContainerLandscape}>
       <View style={{ ...styles.priorityText, backgroundColor: getPriorityColor(note.priority) }}>
           <Text style={[styles.priority, isTablet && styles.priorityTablet]}>
           {note.priority}
@@ -128,7 +145,7 @@ const Notes = () => {
         </View>
         <Text style={[styles.titleNote, isTablet && styles.titleNoteTablet]}>{note.title}</Text>
         <Text style={styles.date}>{note.date}</Text>
-        <ScrollView style={styles.scrollView}>
+        <ScrollView style={ orientation === ORIENTATION.PORTRAIT ? styles.scrollView : styles.scrollViewLandscape}>
         <RichEditor
             key={editorKey}  // Utilisation de l'état `editorKey` pour forcer le re-rendu
             initialContentHTML={note.content}
@@ -164,8 +181,13 @@ const styles = StyleSheet.create({
   },
   containerTablet: {
     flex: 1,
-    padding: 22,
-    backgroundColor: colors.SECONDARY,
+    //padding: 30,
+  },
+  containerLandscape: {
+    backgroundColor: colors.LIGHT,
+    paddingHorizontal: 50,
+    paddingTop: 30,
+    height: '100%'
   },
   formHead: {
     flexDirection: 'row',
@@ -179,24 +201,31 @@ const styles = StyleSheet.create({
     flex : 1,
     backgroundColor: 'white',
     padding: 16,
-    //paddingRight: 20,
-    //width: '110%',
-    //height: '100%',
     borderWidth: 4,
     borderRadius: 30,
     borderColor: colors.SECONDARY,
   },
+  notesContainerLandscape: {
+    flex : 1,
+    backgroundColor: 'white',
+    padding: 16,
+    borderWidth: 4,
+    borderRadius: 30,
+    borderColor: colors.SECONDARY,
+    marginBottom: 20,
+    
+  },
   scrollView : {
    
+  },
+  scrollViewLandscape: {
+    paddingHorizontal: 20,
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    //marginBottom: 16,
     fontFamily: 'Montserrat',
     color: colors.SECONDARY,
-    //marginRight : 120,
-    
   },
   titleTablet: {
     fontSize: 36,
@@ -210,7 +239,6 @@ const styles = StyleSheet.create({
   },
   titleNoteTablet: {
     fontSize: 40,
-    
   },
   date: {
     fontSize: 12,
@@ -223,7 +251,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginBottom: 16,
     fontFamily: 'Montserrat',
-    //width: '50%',
   },
   contentTablet: {
     fontSize: 24,
@@ -234,13 +261,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     padding: 10,
-    //borderRadius: 25,
     textAlign: 'center',
-    //backgroundColor: 'blue',
     alignSelf: 'center',
-    //marginBottom: 16,
     fontFamily: 'Montserrat',
-    //width: '50%',
     color: colors.WHITE,
     
   },
@@ -253,40 +276,29 @@ const styles = StyleSheet.create({
     borderRadius : 25,
     width: '50%',
     marginBottom: 20,
-    
-    
   },
   priorityTextTablet: {
     paddingHorizontal: 28,
-    
   },
  
   buttonContainer: {
-    //width: '100%',
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 5,
     marginTop: 20,
-    
-
   },
   buttonED: {
-    //flex: 1,
     padding: 20,
     borderRadius: 50,
-
     backgroundColor: colors.TERTIARY,
     alignItems: 'center',
     marginHorizontal: 4,
-    //width : 100,
-   
   },
   buttonEDTablet: {
     padding: 30,
     borderRadius: 60,
   },
   buttonDelete: {
-    //flex: 1,
     padding: 20,
     borderRadius: 50,
     backgroundColor: colors.ERROR,
@@ -294,16 +306,10 @@ const styles = StyleSheet.create({
     marginHorizontal: 4,
   },
  
-  // buttonText: {
-  //   fontSize: 18,
-  //   color: '#FFF',
-  //   fontWeight: 'bold',
-  // },
   backButton: {
     marginTop: 16,
     paddingVertical: 12,
     paddingHorizontal: 24,
-    backgroundColor: '#007BFF',
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
@@ -319,14 +325,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 20,
   },
-  // richTextEditor: {
-  //   height: 200,
-  // },
 
-  // richTextEditor: {
-  //   fontSize: 40,
-  //   fontFamily: 'Montserrat',
-  // },
    // Taille des icônes pour les appareils mobiles
    iconSize: 30,
    // Taille des icônes pour les tablettes

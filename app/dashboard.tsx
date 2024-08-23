@@ -7,12 +7,17 @@ import AddButton from '@/components/AddButton';
 import BackButton from '@/components/BackButton';
 import colors from '@/misc/colors';
 
+
+import useOrientation from '../hooks/useOrientation';
+import { ORIENTATION } from '../constants/orientation/index';
+
+
 interface Note {
   id: string;
   title: string;
   date: string;
   content: string;
-  priority: 'Important' | 'Normal' | 'Pense bête';
+  priority: 'Important' | 'Normal' | 'Reminder';
   createdAt: string;
 }
 
@@ -24,7 +29,10 @@ const Dashboard = () => {
   const [user, setUser] = useState<{ name: string }>({ name: '' });
   const navigation = useNavigation();
   const { isTabletOrMobileDevice } = useDeviceType();
+  const orientation = useOrientation();
 
+/* The `useEffect` hook in the provided code snippet is responsible for fetching the user data from
+AsyncStorage when the component mounts for the first time. Here's a breakdown of what it does: */
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -40,6 +48,10 @@ const Dashboard = () => {
     fetchUser();
   }, []);
 
+/**
+ * The `fetchNotes` function retrieves notes from AsyncStorage, sorts them by creation date, and
+ * updates state with the notes array.
+ */
   const fetchNotes = async () => {
     try {
       const storedNotes = await AsyncStorage.getItem('notes');
@@ -54,6 +66,10 @@ const Dashboard = () => {
     }
   };
 
+/* The `useEffect` hook in the provided code snippet is responsible for fetching the notes data from
+AsyncStorage and updating the state with the notes array when the component mounts for the first
+time. It ensures that the notes are loaded and displayed correctly when the Dashboard component is
+initially rendered. */
   useEffect(() => {
     fetchNotes();
   }, []);
@@ -64,6 +80,7 @@ const Dashboard = () => {
     }, [])
   );
 
+  // fonction qui defini un setGreet selon la date et l'heure
   useEffect(() => {
     const currentHour = new Date().getHours();
     if (currentHour < 12) {
@@ -75,37 +92,23 @@ const Dashboard = () => {
     }
   }, []);
 
+
+// fonction de gestion de la priorité des couleurs 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'Important':
-        return '#F45B69'; // Red
+        return colors.ERROR; 
       case 'Normal':
-        return '#456990'; // Green
-      case 'Pense bête':
-        return colors.PRIMARY; // Blue
+        return colors.SECONDARY; 
+      case 'Reminder':
+        return colors.PRIMARY; 
       default:
-        return '#000000'; // Black
+        return '#000000'; 
     }
   };
 
-  // Fonction pour supprimer les balises HTML avec une regex
-  const stripHTML = (html: string) => {
-    return html.replace(/<[^>]*>/g, '');
-  };
 
-  const handlePress = () => {
-    navigation.navigate('formulaire');
-  };
-
-  const navigateToNoteDetails = (noteId: string) => {
-    navigation.navigate('notes', { noteId });
-  };
-
-  const GoBackToIndex = () => {
-    navigation.navigate('index')
-    Keyboard.dismiss();
-  };
-
+// Fonction de la gestion de selection des filtres 
   const handleFilterChange = (filter: string) => {
     setSelectedFilter(filter);
     if (filter === 'All') {
@@ -115,19 +118,38 @@ const Dashboard = () => {
     }
   };
 
+  //Fonction qui count les notes selon leurs priorité dans les filtres
   const countNotesByPriority = (priority: string) => {
     if (priority === 'All') return notes.length;
     return notes.filter(note => note.priority === priority).length;
   };
 
+    // Fonction pour supprimer les balises HTML avec une regex
+    const stripHTML = (html: string) => {
+      return html.replace(/<[^>]*>/g, '');
+    };
+  
+    const handlePress = () => {
+      navigation.navigate('formulaire');
+    };
+  
+    const navigateToNoteDetails = (noteId: string) => {
+      navigation.navigate('notes', { noteId });
+    };
+  
+    const GoBackToIndex = () => {
+      navigation.navigate('index')
+      Keyboard.dismiss();
+    };
+
   return (
-    <View style={[styles.container, isTabletOrMobileDevice && styles.containerTablet]}>
+    <View style={orientation === ORIENTATION.PORTRAIT ? styles.container : styles.containerLandscape}>
       
 
       <View style={styles.formHead}>
         <TouchableOpacity 
-      onPress={GoBackToIndex}>
-          <BackButton  onPress={GoBackToIndex} color={colors.WHITE}  />
+          onPress={GoBackToIndex}>
+          <BackButton  onPress={GoBackToIndex} color={colors.WHITE} size={30}  />
         </TouchableOpacity>
         <Text style={[styles.title, isTabletOrMobileDevice && styles.titleTablet]}>
         {`Good ${greet}, ${user.name}`}
@@ -139,8 +161,9 @@ const Dashboard = () => {
         showsHorizontalScrollIndicator={false} 
         style={[styles.filterScrollView, isTabletOrMobileDevice && styles.filterScrollViewTablet]}
       >
-        <View style={[styles.filterContainer, isTabletOrMobileDevice && styles.filterContainerTablet]}>
-          {['All', 'Important', 'Normal', 'Pense bête'].map((filter) => (
+  
+        <View style={[orientation === ORIENTATION.PORTRAIT ? styles.filterContainer : styles.filterContainerLandscape, isTabletOrMobileDevice && styles.filterContainerTablet ]}>
+          {['All', 'Important', 'Normal', 'Reminder'].map((filter) => (
             <TouchableOpacity
               key={filter}
               style={[
@@ -196,7 +219,8 @@ const Dashboard = () => {
       )}
       
       <TouchableOpacity onPress={handlePress} style={styles.addButton}>
-        <AddButton onPress={handlePress}/>
+        <AddButton onPress={handlePress}   iconName="add" 
+          iconLib="Ionicons" size={30} text={'ADD NOTE'}/>
       </TouchableOpacity>
     </View>
   );
@@ -209,13 +233,13 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     backgroundColor: '#456990',
     justifyContent: 'space-between',
-    
-
   },
-  containerTablet: {
-    padding: 32,
-    paddingHorizontal: 16,
-    paddingVertical: 55,
+ 
+  containerLandscape: {
+    backgroundColor: '#456990',
+    paddingHorizontal: 50,
+    paddingTop: 30,
+    height: '100%'
   },
   formHead: {
     flexDirection: 'row',
@@ -223,35 +247,36 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     alignContent: 'center',
     marginBottom: 25,
-    
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    //marginBottom: 26,
     fontFamily: 'Montserrat',
     alignSelf: 'center',
     color: 'white',
   },
   titleTablet: {
     fontSize: 34,
-    marginBottom: 26,
   },
   filterScrollView: {
-    marginBottom: 16,
+  //  marginBottom: 16,
     //height: '50%',
   },
   filterScrollViewTablet: {
-    marginBottom: 19,
+    //marginBottom: 19,
   },
   filterContainer: {
     flexDirection: 'row',
+  },
+  filterContainerLandscape: {
+    flexDirection: 'row',
+    height: 100,
   },
   filterContainerTablet: {
     justifyContent: 'center',
   },
   filterButton: {
-    paddingVertical: 10,
+    paddingVertical: 11,
     paddingHorizontal: 19,
     borderRadius: 20,
     borderWidth: 1,
@@ -264,9 +289,8 @@ const styles = StyleSheet.create({
   filterButtonTablet: {
     paddingVertical: 20,
     paddingHorizontal: 29,
-    borderRadius: 10,
-    
-    marginRight: 18,
+    borderRadius: 40,
+    marginRight: 20,
     height: 65,
     alignItems: 'center',
   },
@@ -274,7 +298,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.WHITE,
   },
   filterButtonText: {
-    color: 'white',
+    color: colors.WHITE,
     fontFamily: 'Montserrat',
   },
   filterButtonTextTablet: {
